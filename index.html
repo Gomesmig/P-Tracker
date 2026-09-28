@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Proteína</title>
+<meta name="theme-color" content="#16324A">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Proteína">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EFEC; --surface:#F7FAF8; --ink:#16242E; --muted:#5B6C75; --line:#C7D2CD;
+  --fill:#2A6FA8; --fill-soft:#CFE1EF; --done:#2E8A57; --danger:#B3402E;
+  --font:"Archivo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#0F1A22; --surface:#16242E; --ink:#E6EEEA; --muted:#93A5AE; --line:#2B3E4A;
+    --fill:#5FA6DD; --fill-soft:#1D3547; --done:#4FB57C; --danger:#E0725F; color-scheme:dark;}
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.45;
+  -webkit-tap-highlight-color:transparent;}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--fill);outline-offset:2px}
+.app{max-width:560px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:0 18px 96px}
+header.top{display:flex;align-items:center;justify-content:space-between;padding:14px 0 6px}
+header.top h1{font-size:15px;font-weight:600;color:var(--muted);margin:0;font-stretch:100%}
+.icon-btn{background:none;border:0;padding:8px;border-radius:10px;color:var(--muted)}
+.icon-btn svg{width:24px;height:24px;display:block}
+
+/* Hoje: o copo medidor */
+.gauge{display:grid;grid-template-columns:92px 1fr;gap:22px;align-items:end;padding:12px 0 22px}
+.beaker{position:relative;height:250px;border:3px solid var(--ink);border-top:0;border-radius:0 0 18px 18px;overflow:hidden;background:var(--surface)}
+.beaker .liquid{position:absolute;left:0;right:0;bottom:0;height:0;background:var(--fill);transition:height .7s cubic-bezier(.2,.8,.2,1),background .4s}
+.beaker.done .liquid{background:var(--done)}
+.beaker .tick{position:absolute;left:0;width:14px;border-top:2px solid var(--ink);z-index:2}
+.beaker .tick span{position:absolute;left:18px;top:-10px;font-size:11px;font-weight:600;font-stretch:75%;color:var(--ink);mix-blend-mode:normal}
+.beaker .tick.major{width:22px}
+.beaker .tick.goal{width:100%;border-top-style:dashed}
+.beaker .tick.goal span{left:auto;right:6px;top:-18px}
+.beaker .tick.major span{left:26px}
+.readout .num{font-size:92px;line-height:.85;font-weight:800;font-stretch:62%;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.readout .num small{font-size:40px;font-weight:700;margin-left:4px}
+.readout .of{font-size:17px;color:var(--muted);margin-top:8px}
+.readout .left{font-size:21px;font-weight:650;margin-top:14px;font-stretch:88%}
+.readout .left.done{color:var(--done)}
+
+.actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;margin-bottom:22px}
+.btn{border:0;border-radius:14px;padding:15px 18px;font-weight:650;background:var(--surface);border:1.5px solid var(--line)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink);white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn.primary svg{width:22px;height:22px}
+.btn.small{padding:9px 14px;border-radius:11px;font-size:15px}
+.btn.danger{color:var(--danger)}
+.btn:disabled{opacity:.5}
+
+h2{font-size:15px;font-weight:650;color:var(--muted);margin:22px 0 8px;font-stretch:100%}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-size:15px;white-space:nowrap}
+.chip b{font-weight:700;margin-left:4px;color:var(--fill)}
+
+ul.list{list-style:none;margin:0;padding:0}
+ul.list li{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+ul.list li .main{flex:1;min-width:0}
+ul.list li .name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ul.list li .sub{font-size:14px;color:var(--muted)}
+ul.list li .val{font-weight:750;font-stretch:75%;font-size:22px;font-variant-numeric:tabular-nums}
+ul.list li button.x{background:none;border:0;color:var(--muted);padding:6px;font-size:22px;line-height:1}
+.empty{color:var(--muted);padding:18px 0}
+
+/* Histórico */
+.bars{display:flex;align-items:flex-end;gap:5px;height:190px;position:relative;margin:18px 0 6px;border-bottom:2px solid var(--ink)}
+.bars .goal{position:absolute;left:0;right:0;border-top:2px dashed var(--muted)}
+.bars .goal span{position:absolute;right:0;top:-20px;font-size:12px;color:var(--muted)}
+.bars .bar{flex:1;background:var(--fill);border-radius:5px 5px 0 0;min-height:2px;position:relative}
+.bars .bar.done{background:var(--done)}
+.bars .bar.today{outline:2px solid var(--ink);outline-offset:1px}
+.barlabels{display:flex;gap:5px;font-size:11px;color:var(--muted);text-align:center}
+.barlabels span{flex:1}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.stat{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px}
+.stat .k{font-size:14px;color:var(--muted)}
+.stat .v{font-size:30px;font-weight:800;font-stretch:65%}
+
+/* Tab bar */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
+  display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);z-index:10}
+nav.tabs .in{display:flex;max-width:560px;width:100%}
+nav.tabs button{flex:1;background:none;border:0;padding:10px 0 12px;font-size:13px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px}
+nav.tabs button svg{width:24px;height:24px}
+nav.tabs button[aria-current="page"]{color:var(--ink);font-weight:650}
+section[hidden]{display:none}
+
+/* Diálogos */
+dialog{border:0;padding:0;background:var(--surface);color:var(--ink);width:100%;max-width:560px;
+  margin:auto auto 0;border-radius:22px 22px 0 0;max-height:92vh;overflow:auto}
+dialog::backdrop{background:rgba(10,20,28,.55)}
+dialog .body{padding:20px 20px calc(24px + env(safe-area-inset-bottom,0px))}
+dialog h3{margin:0 0 4px;font-size:24px;font-weight:750;font-stretch:85%;line-height:1.15}
+dialog .lede{color:var(--muted);margin:0 0 16px;font-size:15px}
+label.f{display:block;margin:12px 0}
+label.f span{display:block;font-size:14px;font-weight:600;color:var(--muted);margin-bottom:5px}
+label.f input{width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);font-size:18px}
+label.f input:focus{border-color:var(--fill);outline:none}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+.btns{display:flex;gap:10px;margin-top:18px}
+.btns .btn{flex:1}
+.note{font-size:14px;padding:10px 12px;border-radius:12px;background:var(--fill-soft);margin:10px 0}
+.note.warn{background:color-mix(in srgb,var(--danger) 16%,transparent)}
+.big-result{font-size:56px;font-weight:800;font-stretch:62%;line-height:1;margin:6px 0 2px}
+.quick{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.video-wrap{position:relative;border-radius:16px;overflow:hidden;background:#000;aspect-ratio:4/3}
+.video-wrap video{width:100%;height:100%;object-fit:cover;display:block}
+.video-wrap .aim{position:absolute;left:10%;right:10%;top:38%;bottom:38%;border:3px solid rgba(255,255,255,.9);border-radius:12px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
+.status{font-size:15px;color:var(--muted);margin:10px 0 0;min-height:1.4em}
+.search{margin:6px 0 4px}
+.spinner{display:inline-block;width:16px;height:16px;border:2.5px solid var(--line);border-top-color:var(--fill);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-3px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);
+  background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:15px;opacity:0;transition:.25s;pointer-events:none;z-index:50;max-width:90vw}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HOJE -->
+  <section id="tab-hoje">
+    <header class="top">
+      <h1 id="today-label">Hoje</h1>
+      <button class="icon-btn" id="open-settings" aria-label="Definições">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+    </header>
+
+    <div class="gauge">
+      <div class="beaker" id="beaker" aria-hidden="true"><div class="liquid" id="liquid"></div></div>
+      <div class="readout" aria-live="polite">
+        <div class="num"><span id="total">0</span><small>g</small></div>
+        <div class="of">de <span id="goal-label">180</span> g de proteína</div>
+        <div class="left" id="left">Faltam 180 g</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="scan-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>
+        Ler código
+      </button>
+      <button class="btn" id="add-btn">Adicionar</button>
+    </div>
+
+    <div id="favs-wrap" hidden>
+      <h2>Registo rápido</h2>
+      <div class="chips" id="favs"></div>
+    </div>
+
+    <h2>O que comeste hoje</h2>
+    <ul class="list" id="entries"></ul>
+  </section>
+
+  <!-- PRODUTOS -->
+  <section id="tab-produtos" hidden>
+    <header class="top"><h1>Os teus produtos</h1>
+      <button class="btn small" id="new-product-btn">Novo produto</button>
+    </header>
+    <label class="f search"><span class="visually-hidden">Procurar</span><input type="search" id="prod-search" placeholder="Procurar por nome ou marca"></label>
+    <ul class="list" id="products"></ul>
+  </section>
+
+  <!-- HISTÓRICO -->
+  <section id="tab-historico" hidden>
+    <header class="top"><h1>Últimos 14 dias</h1></header>
+    <div class="bars" id="bars"></div>
+    <div class="barlabels" id="barlabels"></div>
+    <div class="stats">
+      <div class="stat"><div class="k">Média diária</div><div class="v" id="avg">0 g</div></div>
+      <div class="stat"><div class="k">Dias com meta cumprida</div><div class="v" id="hit">0</div></div>
+    </div>
+  </section>
+</div>
+
+<nav class="tabs"><div class="in">
+  <button data-tab="hoje" aria-current="page">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 3h10M8 3v16a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V3"/><path d="M8 12h8"/></svg>Hoje</button>
+  <button data-tab="produtos">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Produtos</button>
+  <button data-tab="historico">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V11M10 20V5M15 20v-7M20 20V8"/></svg>Histórico</button>
+</div></nav>
+
+<!-- Scanner -->
+<dialog id="dlg-scan"><div class="body">
+  <h3>Aponta ao código de barras</h3>
+  <p class="lede">Mantém o código dentro do retângulo.</p>
+  <div class="video-wrap"><video id="video" playsinline muted></video><div class="aim"></div></div>
+  <p class="status" id="scan-status"></p>
+  <div class="btns">
+    <button class="btn" id="scan-photo">Tirar foto</button>
+    <button class="btn" id="scan-manual">Escrever código</button>
+  </div>
+  <div class="btns"><button class="btn" data-close>Cancelar</button></div>
+  <input type="file" accept="image/*" capture="environment" id="scan-file" hidden>
+</div></dialog>
+
+<!-- Produto -->
+<dialog id="dlg-product"><div class="body">
+  <h3 id="prod-title">Novo produto</h3>
+  <p class="lede" id="prod-lede">Os valores ficam guardados neste telemóvel.</p>
+  <div id="prod-note"></div>
+  <label class="f"><span>Nome</span><input id="p-name" autocomplete="off" placeholder="ex: Skyr natural"></label>
+  <label class="f"><span>Marca</span><input id="p-brand" autocomplete="off" placeholder="ex: Milbona"></label>
+  <div class="row">
+    <label class="f"><span>Proteína por 100 g</span><input id="p-p100" inputmode="decimal" placeholder="0,0"></label>
+    <label class="f"><span>Peso de 1 unidade (g)</span><input id="p-unit" inputmode="decimal" placeholder="opcional"></label>
+  </div>
+  <button class="btn" id="read-label" style="width:100%">Ler proteína da etiqueta</button>
+  <p class="status" id="ocr-status"></p>
+  <label class="f"><span>Código de barras</span><input id="p-code" inputmode="numeric" placeholder="opcional"></label>
+  <div class="btns">
+    <button class="btn danger" id="p-delete" hidden>Apagar</button>
+    <button class="btn" data-close>Cancelar</button>
+    <button class="btn primary" id="p-save">Guardar</button>
+  </div>
+  <input type="file" accept="image/*" capture="environment" id="label-file" hidden>
+</div></dialog>
+
+<!-- Quantidade -->
+<dialog id="dlg-amount"><div class="body">
+  <h3 id="a-name">Produto</h3>
+  <p class="lede" id="a-sub"></p>
+  <label class="f"><span>Quanto comeste (g)</span><input id="a-grams" inputmode="decimal"></label>
+  <div class="quick" id="a-quick"></div>
+  <div class="big-result"><span id="a-result">0</span> g</div>
+  <p class="lede">de proteína</p>
+  <div class="btns">
+    <button class="btn" id="a-edit">Editar produto</button>
+    <button class="btn primary" id="a-save">Registar</button>
+  </div>
+  <div class="btns"><button class="btn" data-close>Cancelar</button></div>
+</div></dialog>
+
+<!-- Adicionar (escolher) -->
+<dialog id="dlg-add"><div class="body">
+  <h3>Adicionar</h3>
+  <label class="f search"><span class="visually-hidden">Procurar</span><input type="search" id="add-search" placeholder="Procurar (ex: frango, atum, ovo)"></label>
+  <ul class="list" id="add-list"></ul>
+  <div class="btns">
+    <button class="btn" id="add-quick">Só as gramas de proteína</button>
+    <button class="btn" id="add-new">Novo produto</button>
+  </div>
+  <div class="btns"><button class="btn" data-close>Fechar</button></div>
+</div></dialog>
+
+<!-- Entrada rápida -->
+<dialog id="dlg-quick"><div class="body">
+  <h3>Registo rápido</h3>
+  <p class="lede">Para refeições fora ou coisas sem rótulo.</p>
+  <label class="f"><span>Proteína (g)</span><input id="q-prot" inputmode="decimal"></label>
+  <label class="f"><span>Descrição</span><input id="q-desc" placeholder="ex: Almoço no restaurante"></label>
+  <div class="btns"><button class="btn" data-close>Cancelar</button><button class="btn primary" id="q-save">Registar</button></div>
+</div></dialog>
+
+<!-- Definições -->
+<dialog id="dlg-settings"><div class="body">
+  <h3>Definições</h3>
+  <label class="f"><span>Meta diária de proteína (g)</span><input id="s-goal" inputmode="numeric"></label>
+  <h2>Cópia de segurança</h2>
+  <p class="lede">Os dados ficam só neste telemóvel. Exporta de vez em quando para não perderes os produtos.</p>
+  <div class="btns"><button class="btn" id="s-export">Exportar</button><button class="btn" id="s-import">Importar</button></div>
+  <input type="file" accept="application/json,.json" id="import-file" hidden>
+  <div class="btns"><button class="btn" data-close>Fechar</button><button class="btn primary" id="s-save">Guardar</button></div>
+</div></dialog>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="lib/zxing.min.js" defer></script>
+<script src="app.js" defer></script>
+</body>
+</html>
