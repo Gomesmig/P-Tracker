@@ -133,6 +133,37 @@ label.f input:focus{border-color:var(--fill);outline:none}
 .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);
   background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:15px;opacity:0;transition:.25s;pointer-events:none;z-index:50;max-width:90vw}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.daynav{display:flex;align-items:center;gap:2px;min-width:0}
+.daynav h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.daynav .icon-btn{padding:6px}
+.daynav .icon-btn:disabled{opacity:.25}
+.pill{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px;font-size:13px;font-weight:600;margin-left:6px}
+.meters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:-6px 0 18px}
+.meter{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:10px 12px}
+.meter .mhead{display:flex;flex-direction:column;gap:0;font-size:14px;color:var(--muted)}
+.meter .mhead b{color:var(--ink);font-size:26px;line-height:1.1;white-space:nowrap;font-weight:750;font-stretch:70%;font-variant-numeric:tabular-nums}
+.meter .mhead b small{font-size:13px;font-weight:500;color:var(--muted)}
+.meter .track{height:6px;border-radius:3px;background:var(--line);margin-top:8px;overflow:hidden}
+.meter .track div{height:100%;background:var(--ink);border-radius:3px;transition:width .5s}
+.meter .mfoot{font-size:13px;color:var(--muted);margin-top:4px}
+.meter.over .track div{background:var(--danger)}
+.meter.over .mfoot{color:var(--danger);font-weight:600}
+.link-btn{background:none;border:0;color:var(--fill);font-weight:600;padding:0;margin:-8px 0 16px;font-size:15px;text-align:left}
+.meal{margin-bottom:6px}
+.meal-head{display:flex;justify-content:space-between;font-size:14px;font-weight:650;color:var(--muted);padding:12px 0 2px;border-bottom:2px solid var(--ink)}
+.meal-head span:last-child{font-weight:500;font-variant-numeric:tabular-nums}
+ul.list li[data-entry]{cursor:pointer}
+.sub .per{opacity:.7}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg{display:flex;border:1.5px solid var(--line);border-radius:12px;overflow:hidden;margin-top:6px}
+.seg button{flex:1;background:var(--surface);border:0;padding:9px 0;font-size:15px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.bars .bar{border:0;padding:0}
+.bars .bar.over{background:var(--danger)}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.row3 label.f span{font-size:13px}
+.backup{font-size:14px;color:var(--muted);margin:0 0 4px}
+.backup.warn{color:var(--danger);font-weight:600}
 .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -143,7 +174,12 @@ label.f input:focus{border-color:var(--fill);outline:none}
   <!-- HOJE -->
   <section id="tab-hoje">
     <header class="top">
-      <h1 id="today-label">Hoje</h1>
+      <div class="daynav">
+        <button class="icon-btn" id="prev-day" aria-label="Dia anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <h1 id="today-label">Hoje</h1>
+        <button class="icon-btn" id="next-day" aria-label="Dia seguinte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
+        <button class="pill" id="back-today" hidden>Hoje</button>
+      </div>
       <button class="icon-btn" id="open-settings" aria-label="Definições">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
       </button>
@@ -158,6 +194,9 @@ label.f input:focus{border-color:var(--fill);outline:none}
       </div>
     </div>
 
+    <div class="meters" id="meters"></div>
+    <button class="link-btn" id="set-goals" hidden>Definir metas de calorias e hidratos</button>
+
     <div class="actions">
       <button class="btn primary" id="scan-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>
@@ -171,8 +210,8 @@ label.f input:focus{border-color:var(--fill);outline:none}
       <div class="chips" id="favs"></div>
     </div>
 
-    <h2>O que comeste hoje</h2>
-    <ul class="list" id="entries"></ul>
+    <h2 id="entries-title">O que comeste hoje</h2>
+    <div id="entries"></div>
   </section>
 
   <!-- PRODUTOS -->
@@ -187,11 +226,14 @@ label.f input:focus{border-color:var(--fill);outline:none}
   <!-- HISTÓRICO -->
   <section id="tab-historico" hidden>
     <header class="top"><h1>Últimos 14 dias</h1></header>
+    <div class="seg" id="hist-seg" role="group" aria-label="Métrica">
+      <button data-m="p" aria-pressed="true">Proteína</button><button data-m="k" aria-pressed="false">Calorias</button><button data-m="c" aria-pressed="false">Hidratos</button>
+    </div>
     <div class="bars" id="bars"></div>
     <div class="barlabels" id="barlabels"></div>
     <div class="stats">
       <div class="stat"><div class="k">Média diária</div><div class="v" id="avg">0 g</div></div>
-      <div class="stat"><div class="k">Dias com meta cumprida</div><div class="v" id="hit">0</div></div>
+      <div class="stat"><div class="k" id="hit-label">Dias com meta cumprida</div><div class="v" id="hit">0</div></div>
     </div>
   </section>
 </div>
@@ -226,13 +268,18 @@ label.f input:focus{border-color:var(--fill);outline:none}
   <div id="prod-note"></div>
   <label class="f"><span>Nome</span><input id="p-name" autocomplete="off" placeholder="ex: Skyr natural"></label>
   <label class="f"><span>Marca</span><input id="p-brand" autocomplete="off" placeholder="ex: Milbona"></label>
-  <div class="row">
-    <label class="f"><span>Proteína por 100 g</span><input id="p-p100" inputmode="decimal" placeholder="0,0"></label>
-    <label class="f"><span>Peso de 1 unidade (g)</span><input id="p-unit" inputmode="decimal" placeholder="opcional"></label>
+  <p class="lede" style="margin:14px 0 -6px">Valores por 100 g</p>
+  <div class="row3">
+    <label class="f"><span>Proteína (g)</span><input id="p-p100" inputmode="decimal" placeholder="0,0"></label>
+    <label class="f"><span>Calorias</span><input id="p-k100" inputmode="decimal" placeholder="kcal"></label>
+    <label class="f"><span>Hidratos (g)</span><input id="p-c100" inputmode="decimal" placeholder="0,0"></label>
   </div>
-  <button class="btn" id="read-label" style="width:100%">Ler proteína da etiqueta</button>
+  <button class="btn" id="read-label" style="width:100%">Ler valores da etiqueta</button>
   <p class="status" id="ocr-status"></p>
-  <label class="f"><span>Código de barras</span><input id="p-code" inputmode="numeric" placeholder="opcional"></label>
+  <div class="row">
+    <label class="f"><span>Peso de 1 unidade (g)</span><input id="p-unit" inputmode="decimal" placeholder="opcional"></label>
+    <label class="f"><span>Código de barras</span><input id="p-code" inputmode="numeric" placeholder="opcional"></label>
+  </div>
   <div class="btns">
     <button class="btn danger" id="p-delete" hidden>Apagar</button>
     <button class="btn" data-close>Cancelar</button>
@@ -248,7 +295,9 @@ label.f input:focus{border-color:var(--fill);outline:none}
   <label class="f"><span>Quanto comeste (g)</span><input id="a-grams" inputmode="decimal"></label>
   <div class="quick" id="a-quick"></div>
   <div class="big-result"><span id="a-result">0</span> g</div>
-  <p class="lede">de proteína</p>
+  <p class="lede" style="margin-bottom:4px">de proteína</p>
+  <p class="lede" id="a-extra"></p>
+  <div class="quick" id="a-meals" role="group" aria-label="Refeição"></div>
   <div class="btns">
     <button class="btn" id="a-edit">Editar produto</button>
     <button class="btn primary" id="a-save">Registar</button>
@@ -270,19 +319,30 @@ label.f input:focus{border-color:var(--fill);outline:none}
 
 <!-- Entrada rápida -->
 <dialog id="dlg-quick"><div class="body">
-  <h3>Registo rápido</h3>
+  <h3 id="q-title">Registo rápido</h3>
   <p class="lede">Para refeições fora ou coisas sem rótulo.</p>
-  <label class="f"><span>Proteína (g)</span><input id="q-prot" inputmode="decimal"></label>
+  <div class="row3">
+    <label class="f"><span>Proteína (g)</span><input id="q-prot" inputmode="decimal"></label>
+    <label class="f"><span>Calorias</span><input id="q-kcal" inputmode="decimal" placeholder="opcional"></label>
+    <label class="f"><span>Hidratos (g)</span><input id="q-carbs" inputmode="decimal" placeholder="opcional"></label>
+  </div>
   <label class="f"><span>Descrição</span><input id="q-desc" placeholder="ex: Almoço no restaurante"></label>
+  <div class="quick" id="q-meals" role="group" aria-label="Refeição"></div>
   <div class="btns"><button class="btn" data-close>Cancelar</button><button class="btn primary" id="q-save">Registar</button></div>
 </div></dialog>
 
 <!-- Definições -->
 <dialog id="dlg-settings"><div class="body">
-  <h3>Definições</h3>
-  <label class="f"><span>Meta diária de proteína (g)</span><input id="s-goal" inputmode="numeric"></label>
+  <h3>Metas diárias</h3>
+  <label class="f"><span>Proteína (g)</span><input id="s-goal" inputmode="numeric"></label>
+  <div class="row">
+    <label class="f"><span>Calorias (kcal)</span><input id="s-kcal" inputmode="numeric" placeholder="sem meta"></label>
+    <label class="f"><span>Hidratos (g)</span><input id="s-carbs" inputmode="numeric" placeholder="sem meta"></label>
+  </div>
+  <p class="lede">Nas calorias e hidratos, a meta funciona como limite: a barra fica vermelha se passares.</p>
   <h2>Cópia de segurança</h2>
   <p class="lede">Os dados ficam só neste telemóvel. Exporta de vez em quando para não perderes os produtos.</p>
+  <p class="backup" id="s-backup"></p>
   <div class="btns"><button class="btn" id="s-export">Exportar</button><button class="btn" id="s-import">Importar</button></div>
   <input type="file" accept="application/json,.json" id="import-file" hidden>
   <div class="btns"><button class="btn" data-close>Fechar</button><button class="btn primary" id="s-save">Guardar</button></div>

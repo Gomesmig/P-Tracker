@@ -1,5 +1,5 @@
 // Guarda a app no telemóvel para funcionar sem rede.
-const VERSION = 'proteina-v2';
+const VERSION = 'proteina-v3';
 const CORE = ['./', 'index.html', 'app.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'lib/zxing.min.js'];
 const OCR = ['lib/tesseract.min.js', 'lib/worker.min.js', 'lib/core/tesseract-core-simd-lstm.wasm.js', 'lib/core/tesseract-core-lstm.wasm.js', 'lib/lang/por.traineddata.gz'];
 

@@ -18,6 +18,14 @@ A câmara só funciona em HTTPS, por isso não dá para abrir o `index.html` dir
 
 Depois da primeira abertura, funciona sem rede. Só a pesquisa no Open Food Facts precisa de internet.
 
+## Novidades (v3)
+
+- Calorias e hidratos por produto, com metas diárias (funcionam como limite).
+- Registos agrupados por refeição; tocar num registo para corrigir.
+- Setas junto à data para ver e registar noutros dias.
+- Histórico com proteína, calorias ou hidratos; tocar numa barra abre esse dia.
+- Produtos antigos com código de barras são completados automaticamente pelo Open Food Facts.
+
 ## Como funciona
 
 - **Código de barras:** lido no telemóvel (BarcodeDetector nativo no Android, ZXing no iPhone).
