@@ -74,8 +74,23 @@ const GENERIC = [
   ['g-batata', 'Batata (cozida)', 2, 85, 18, null],
   ['g-amendoim', 'Amendoim', 25, 590, 10, 30],
   ['g-amendoas', 'Amêndoas', 21, 600, 7, 30],
+  ['g-manteiga-amendoim', 'Manteiga de amendoim', 25, 600, 13, 15],
+  ['g-iogurte-natural', 'Iogurte natural', 4, 65, 5, 120],
+  ['g-azeite', 'Azeite', 0, 884, 0, 10],
+  // fruta: peso da unidade já sem casca
+  ['g-banana', 'Banana', 1.1, 90, 20, 120],
+  ['g-maca', 'Maçã', 0.3, 52, 12, 170],
+  ['g-pera', 'Pera', 0.4, 57, 12, 160],
+  ['g-laranja', 'Laranja', 0.9, 47, 9, 180],
+  ['g-tangerina', 'Tangerina', 0.8, 53, 11, 70],
+  ['g-kiwi', 'Kiwi', 1.1, 61, 10, 75],
+  ['g-morangos', 'Morangos', 0.7, 32, 6, null],
+  ['g-uvas', 'Uvas', 0.7, 69, 16, null],
+  ['g-melancia', 'Melancia', 0.6, 30, 7, null],
+  ['g-melao', 'Melão', 0.8, 34, 8, null],
+  ['g-abacate', 'Abacate', 2, 160, 2, 150],
 ];
-const SEED_VERSION = 2;
+const SEED_VERSION = 3;
 function seedGeneric() {
   if ((state.seedVersion || 0) >= SEED_VERSION) return;
   const seeded = new Set(state.seeded || []);
@@ -96,11 +111,11 @@ seedGeneric();
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 
 /* ---------- Refeições ---------- */
-const MEALS = [['pa', 'Pequeno-almoço'], ['al', 'Almoço'], ['la', 'Lanche'], ['ja', 'Jantar']];
+const MEALS = [['pa', 'Pequeno-almoço'], ['al', 'Almoço'], ['la', 'Lanche'], ['ja', 'Jantar'], ['ce', 'Ceia']];
 const mealName = (id) => (MEALS.find((m) => m[0] === id) || MEALS[3])[1];
 function mealFor(t) {
-  const h = new Date(t).getHours();
-  return h < 11 ? 'pa' : h < 15 ? 'al' : h < 19 ? 'la' : 'ja';
+  const d = new Date(t); const h = d.getHours() + d.getMinutes() / 60;
+  return h < 5 ? 'ce' : h < 11 ? 'pa' : h < 15 ? 'al' : h < 19 ? 'la' : h < 21.5 ? 'ja' : 'ce';
 }
 
 /* ---------- Registos ---------- */
@@ -328,7 +343,7 @@ function openAmount(pid, entry) {
   const hint = /\(cru|\(crua/.test(p.name) ? ' · pesa antes de cozinhar' : /cozid|cozinhad|grelhad|escorrid/.test(p.name) ? ' · pesa já pronto' : '';
   $('#a-sub').textContent = `${p.brand ? p.brand + ' · ' : ''}${per100(p)} por 100 g${hint}`;
   const opts = [];
-  const unitName = /atum em lata/i.test(p.name) ? ['1 lata', '2 latas'] : /claras/i.test(p.name) ? ['1 clara', '2 claras'] : /ovo/i.test(p.name) ? ['1 ovo', '2 ovos'] : /leite/i.test(p.name) ? ['1 copo', '2 copos'] : ['1 unidade', '2 unidades'];
+  const unitName = /^banana/i.test(p.name) ? ['1 banana', '2 bananas'] : /azeite|manteiga de amendoim/i.test(p.name) ? ['1 colher', '2 colheres'] : /iogurte/i.test(p.name) ? ['1 iogurte', '2 iogurtes'] : /atum em lata/i.test(p.name) ? ['1 lata', '2 latas'] : /claras/i.test(p.name) ? ['1 clara', '2 claras'] : /ovo/i.test(p.name) ? ['1 ovo', '2 ovos'] : /leite/i.test(p.name) ? ['1 copo', '2 copos'] : ['1 unidade', '2 unidades'];
   if (p.unitG) opts.push([p.unitG, unitName[0]], [p.unitG * 2, unitName[1]]);
   if (/claras/i.test(p.name) && p.unitG) opts.push([p.unitG * 3, '3 claras'], [p.unitG * 4, '4 claras']);
   else if (/ovo/i.test(p.name) && p.unitG) opts.push([p.unitG * 3, '3 ovos'], [p.unitG * 4, '4 ovos']);
