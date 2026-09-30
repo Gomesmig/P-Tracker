@@ -1,39 +1,35 @@
 # Proteína
 
-App para registar as gramas de proteína diárias. Funciona no telemóvel sem servidor e sem conta. Os dados ficam no próprio telemóvel.
-
-## Como pôr online (GitHub Pages, ~5 min)
-
-1. Cria um repositório no GitHub (pode ser privado se tiveres GitHub Pro; senão público, que não tem dados teus).
-2. Faz upload de **todo o conteúdo desta pasta** para a raiz do repositório.
-3. Settings → Pages → Source: "Deploy from a branch" → branch `main`, pasta `/ (root)` → Save.
-4. Ao fim de 1–2 minutos fica disponível em `https://<utilizador>.github.io/<repositorio>/`.
-
-A câmara só funciona em HTTPS, por isso não dá para abrir o `index.html` diretamente do telemóvel.
+App para registar a proteína, as calorias e os hidratos que comes ao longo do dia. Funciona no telemóvel sem servidor e sem conta, e os dados ficam guardados no próprio telemóvel.
 
 ## Instalar no telemóvel
 
-- **Android (Chrome):** abre o link → menu ⋮ → "Adicionar ao ecrã principal".
-- **iPhone (Safari):** abre o link → botão Partilhar → "Adicionar ao ecrã principal".
+- **Android (Chrome):** abre o link → menu ⋮ → "Instalar app".
+- **iPhone (Safari):** abre o link → Partilhar → "Adicionar ao ecrã principal".
 
-Depois da primeira abertura, funciona sem rede. Só a pesquisa no Open Food Facts precisa de internet.
+Depois da primeira abertura, funciona sem rede. Só a pesquisa de produtos no Open Food Facts precisa de internet.
 
-## Novidades (v3)
+## Funcionalidades
 
-- Calorias e hidratos por produto, com metas diárias (funcionam como limite).
-- Registos agrupados por refeição; tocar num registo para corrigir.
-- Setas junto à data para ver e registar noutros dias.
-- Histórico com proteína, calorias ou hidratos; tocar numa barra abre esse dia.
-- Produtos antigos com código de barras são completados automaticamente pelo Open Food Facts.
+- **Metas diárias:** proteína (objetivo a atingir), calorias e hidratos (limites). Definem-se em Definições.
+- **Código de barras:** leitura contínua pela câmara. Os produtos novos são pesquisados no Open Food Facts.
+- **Leitura da etiqueta:** tira foto à tabela nutricional para preencher proteína, calorias e hidratos por 100 g. O OCR corre no telemóvel.
+- **Alimentos sem código:** cerca de 55 alimentos comuns (carne, peixe, ovos, lacticínios, leguminosas, cereais, fruta…) com valores médios por 100 g, em versão crua ou cozinhada. Podes editá-los ou apagá-los.
+- **Refeições:** pequeno-almoço, almoço, lanche, jantar e ceia. A refeição é sugerida pela hora do registo e pode ser alterada.
+- **Registo rápido:** para refeições fora de casa, só com as gramas de proteína (e, opcionalmente, calorias e hidratos).
+- **Editar registos:** tocar num registo permite corrigir a quantidade ou a refeição.
+- **Outros dias:** as setas junto à data permitem ver ou registar noutro dia.
+- **Histórico:** gráfico dos últimos 14 dias de proteína, calorias ou hidratos. Tocar numa barra abre esse dia.
+- **Cópia de segurança:** Definições → Exportar / Importar, em ficheiro JSON.
 
 ## Como funciona
 
-- **Código de barras:** lido no telemóvel (BarcodeDetector nativo no Android, ZXing no iPhone).
-- **Produto novo:** tenta o Open Food Facts; se não houver dados, lês a etiqueta com a câmara (OCR Tesseract, corre no telemóvel) ou escreves o valor.
-- **Alimentos sem código:** a app traz ~40 alimentos comuns (frango, vitela, atum, ovos, leguminosas…) com valores médios por 100 g, cru ou cozinhado. Podes editar ou apagar.
-- **Base de dados:** `localStorage` do browser. Usa Definições → Exportar para fazer cópias de segurança.
+- **Código de barras:** usa o BarcodeDetector nativo quando existe (Android) e a biblioteca ZXing nos outros casos (iPhone).
+- **Etiquetas:** usa o Tesseract.js com o modelo de português, incluído na app.
+- **Dados:** guardados no `localStorage` do browser. Faz exportações regulares para não perderes os produtos e os registos.
+- **Atualizações:** ao alterar ficheiros, muda o `VERSION` no `sw.js` para os telemóveis apanharem a versão nova.
 
 ## Bibliotecas incluídas (em `lib/`)
 
 - ZXing (Apache 2.0)
-- Tesseract.js + tesseract.js-core + dados de português (Apache 2.0)
+- Tesseract.js, tesseract.js-core e dados de português (Apache 2.0)
