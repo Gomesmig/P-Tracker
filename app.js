@@ -8,9 +8,9 @@ const state = load();
 function load() {
   try {
     const d = JSON.parse(localStorage.getItem(KEY));
-    if (d && d.products && d.log) return { goal: 180, goalKcal: null, goalCarbs: null, ...d };
+    if (d && d.products && d.log) return { goal: 180, goalKcal: null, goalCarbs: null, goalWater: 2500, water: {}, ...d, water: d.water || {} };
   } catch (e) {}
-  return { goal: 180, goalKcal: null, goalCarbs: null, products: {}, log: {} };
+  return { goal: 180, goalKcal: null, goalCarbs: null, goalWater: 2500, water: {}, products: {}, log: {} };
 }
 function save() {
   try { localStorage.setItem(KEY, JSON.stringify(state)); }
@@ -89,18 +89,92 @@ const GENERIC = [
   ['g-melancia', 'Melancia', 0.6, 30, 7, null],
   ['g-melao', 'Melão', 0.8, 34, 8, null],
   ['g-abacate', 'Abacate', 2, 160, 2, 150],
+  // frutos secos e sementes (1 mão-cheia ≈ 30 g, 1 colher ≈ 15 g)
+  ['g-nozes', 'Nozes', 15, 654, 7, 30, ['1 mão-cheia', '2 mãos-cheias']],
+  ['g-cajus', 'Cajus', 18, 553, 27, 30, ['1 mão-cheia', '2 mãos-cheias']],
+  ['g-avelas', 'Avelãs', 15, 628, 7, 30, ['1 mão-cheia', '2 mãos-cheias']],
+  ['g-pistacios', 'Pistácios (sem casca)', 20, 560, 18, 30, ['1 mão-cheia', '2 mãos-cheias']],
+  ['g-misto-frutos-secos', 'Mistura de frutos secos', 18, 600, 12, 30, ['1 mão-cheia', '2 mãos-cheias']],
+  ['g-sem-abobora', 'Sementes de abóbora', 30, 560, 5, 15, ['1 colher', '2 colheres']],
+  ['g-sem-girassol', 'Sementes de girassol', 21, 584, 11, 15, ['1 colher', '2 colheres']],
+  ['g-chia', 'Sementes de chia', 17, 486, 8, 15, ['1 colher', '2 colheres']],
+  ['g-linhaca', 'Sementes de linhaça', 18, 534, 2, 15, ['1 colher', '2 colheres']],
+  ['g-tamaras', 'Tâmaras', 2.5, 280, 64, 10, ['1 tâmara', '2 tâmaras']],
+  ['g-passas', 'Uvas passas', 3, 300, 69, 15, ['1 colher', '2 colheres']],
+  ['g-figos-secos', 'Figos secos', 3.3, 250, 48, 20, ['1 figo', '2 figos']],
+  ['g-damascos-secos', 'Damascos secos', 3.4, 240, 55, 8, ['1 damasco', '2 damascos']],
+  // talho e charcutaria ao balcão
+  ['g-frango-assado', 'Frango assado com pele', 27, 240, 0, null],
+  ['g-hamburguer', 'Hambúrguer de vaca (cru)', 17, 250, 0, 120, ['1 hambúrguer', '2 hambúrgueres']],
+  ['g-borrego', 'Costeletas de borrego (grelhadas)', 25, 290, 0, null],
+  ['g-figado', 'Fígado de vaca (cozinhado)', 29, 190, 5, null],
+  ['g-fiambre', 'Fiambre de peru (balcão)', 17, 105, 1.5, 20, ['1 fatia', '2 fatias']],
+  ['g-presunto', 'Presunto', 28, 250, 0, 15, ['1 fatia', '2 fatias']],
+  ['g-chourico', 'Chouriço', 22, 450, 2, 10, ['1 fatia', '2 fatias']],
+  // peixe e marisco
+  ['g-sardinha', 'Sardinha (grelhada)', 25, 210, 0, 50, ['1 sardinha', '2 sardinhas']],
+  ['g-carapau', 'Carapau (grelhado)', 24, 160, 0, null],
+  ['g-cavala', 'Cavala (grelhada)', 24, 260, 0, null],
+  ['g-lulas', 'Lulas (grelhadas)', 19, 110, 3, null],
+  ['g-mexilhao', 'Mexilhão (cozido)', 24, 172, 7, null],
+  // queijos ao balcão
+  ['g-flamengo', 'Queijo flamengo', 25, 350, 0, 20, ['1 fatia', '2 fatias']],
+  ['g-mozzarella', 'Mozzarella fresca', 18, 250, 1, 125, ['1 bola', '2 bolas']],
+  ['g-parmesao', 'Queijo parmesão', 35, 400, 0, 5, ['1 colher', '2 colheres']],
+  // legumes e hortícolas
+  ['g-sopa-legumes', 'Sopa de legumes', 1.5, 40, 5, 300, ['1 prato', '2 pratos']],
+  ['g-brocolos', 'Brócolos (cozidos)', 2.4, 35, 4, null],
+  ['g-espinafres', 'Espinafres (cozidos)', 3, 23, 1, null],
+  ['g-ervilhas', 'Ervilhas (cozidas)', 5.4, 80, 10, null],
+  ['g-feijao-verde', 'Feijão-verde (cozido)', 1.9, 31, 4, null],
+  ['g-couve', 'Couve (cozida)', 1.9, 25, 3, null],
+  ['g-cogumelos', 'Cogumelos', 3.1, 22, 0.5, null],
+  ['g-cenoura', 'Cenoura', 0.9, 41, 7, 80],
+  ['g-tomate', 'Tomate', 0.9, 18, 3, 120, ['1 tomate', '2 tomates']],
+  ['g-alface', 'Alface', 1.4, 15, 1.5, null],
+  ['g-pepino', 'Pepino', 0.7, 15, 3, null],
+  ['g-pimento', 'Pimento', 1, 28, 5, 150],
+  ['g-cebola', 'Cebola', 1.1, 40, 8, 110],
+  ['g-abobora', 'Abóbora (cozida)', 0.8, 20, 4, null],
+  ['g-milho', 'Milho doce (cozido)', 3.3, 96, 19, null],
+  ['g-batata-doce', 'Batata-doce (cozida)', 1.6, 86, 18, null],
+  ['g-batata-frita', 'Batata frita (caseira)', 3.4, 300, 38, null],
+  // cereais e pão
+  ['g-arroz-integral', 'Arroz integral (cozido)', 2.6, 123, 24, null],
+  ['g-massa-integral', 'Massa integral (cozida)', 5.8, 150, 27, null],
+  ['g-quinoa', 'Quinoa (cozida)', 4.4, 120, 18, null],
+  ['g-cuscuz', 'Cuscuz (cozido)', 3.8, 112, 22, null],
+  ['g-pao-integral', 'Pão integral', 11, 250, 41, 50],
+  ['g-broa', 'Broa de milho', 6, 230, 45, 50, ['1 fatia', '2 fatias']],
+  // mais fruta
+  ['g-ananas', 'Ananás', 0.5, 50, 12, null],
+  ['g-manga', 'Manga', 0.8, 60, 14, null],
+  ['g-pessego', 'Pêssego', 0.9, 39, 9, 150],
+  ['g-ameixa', 'Ameixa', 0.7, 46, 10, 60],
+  ['g-cerejas', 'Cerejas', 1, 63, 14, null],
+  ['g-mirtilos', 'Mirtilos', 0.7, 57, 12, null],
+  ['g-framboesas', 'Framboesas', 1.2, 52, 5, null],
+  ['g-figo', 'Figo fresco', 0.8, 74, 16, 50],
+  ['g-diospiro', 'Dióspiro', 0.6, 70, 17, 200],
+  ['g-roma', 'Romã', 1.7, 83, 14, null],
+  // extras
+  ['g-manteiga', 'Manteiga', 0.9, 717, 0.1, 10, ['1 colher', '2 colheres']],
+  ['g-mel', 'Mel', 0.3, 330, 82, 20, ['1 colher', '2 colheres']],
+  ['g-acucar', 'Açúcar', 0, 400, 100, 6, ['1 pacote', '2 pacotes']],
+  ['g-chocolate-negro', 'Chocolate negro 70%', 8, 580, 34, 10, ['1 quadrado', '2 quadrados']],
 ];
-const SEED_VERSION = 3;
+const SEED_VERSION = 4;
 function seedGeneric() {
   if ((state.seedVersion || 0) >= SEED_VERSION) return;
   const seeded = new Set(state.seeded || []);
-  for (const [id, name, p100, k100, c100, unitG] of GENERIC) {
+  for (const [id, name, p100, k100, c100, unitG, unitLabel] of GENERIC) {
     const p = state.products[id];
     if (p) { // completa os valores novos sem mexer no que editaste
       if (p.k100 == null) p.k100 = k100;
       if (p.c100 == null) p.c100 = c100;
+      if (p.generic && unitLabel && !p.unitLabel) p.unitLabel = unitLabel;
     } else if (!seeded.has(id)) {
-      state.products[id] = { id, name, brand: '', p100, k100, c100, unitG, code: null, generic: true, updated: Date.now() };
+      state.products[id] = { id, name, brand: '', p100, k100, c100, unitG, unitLabel: unitLabel || null, code: null, generic: true, updated: Date.now() };
     }
     seeded.add(id);
   }
@@ -122,8 +196,24 @@ function mealFor(t) {
 let viewDay = dayKey();
 const isToday = () => viewDay === dayKey();
 function entries(k = viewDay) { return state.log[k] || []; }
+function waterLog(k = viewDay) { return state.water[k] || []; }
+function waterTotal(k = viewDay) { return waterLog(k).reduce((s, w) => s + w.ml, 0); }
 function totals(k = viewDay) {
-  return entries(k).reduce((s, e) => ({ p: s.p + (e.protein || 0), k: s.k + (e.kcal || 0), c: s.c + (e.carbs || 0) }), { p: 0, k: 0, c: 0 });
+  const t = entries(k).reduce((s, e) => ({ p: s.p + (e.protein || 0), k: s.k + (e.kcal || 0), c: s.c + (e.carbs || 0) }), { p: 0, k: 0, c: 0 });
+  t.w = waterTotal(k);
+  return t;
+}
+function addWater(ml) {
+  const k = viewDay;
+  (state.water[k] = state.water[k] || []).push({ id: uid(), t: entryTime(), ml });
+  save(); renderWater(); renderHistory();
+  if (navigator.vibrate) navigator.vibrate(30);
+}
+function undoWater() {
+  const l = state.water[viewDay];
+  if (!l || !l.length) return;
+  const w = l.pop(); save(); renderWater(); renderHistory();
+  toast(`Removidos ${w.ml} ml`);
 }
 function findByCode(code) { return Object.values(state.products).find((p) => p.code === code); }
 function macros(p, g) {
@@ -229,6 +319,7 @@ function renderToday() {
 
   $('#meters').innerHTML = meterRow('Calorias', t.k, state.goalKcal, ' kcal') + meterRow('Hidratos', t.c, state.goalCarbs, ' g');
   $('#set-goals').hidden = !!(state.goalKcal && state.goalCarbs);
+  renderWater();
 
   const favs = Object.values(state.products).filter((p) => p.uses).sort((a, b) => b.uses - a.uses).slice(0, 8);
   $('#favs-wrap').hidden = !favs.length;
@@ -254,6 +345,30 @@ function renderToday() {
         <button class="x" data-del="${e.id}" aria-label="Apagar registo">×</button></li>`).join('')}</ul></div>`;
   }).join('');
 }
+
+const litres = (ml) => (ml / 1000).toLocaleString('pt-PT', { minimumFractionDigits: ml % 1000 ? 1 : 0, maximumFractionDigits: 2 });
+function renderWater() {
+  const ml = waterTotal(); const goal = state.goalWater;
+  $('#w-total').textContent = litres(ml);
+  $('#w-goal').textContent = goal ? ` / ${litres(goal)} L` : ' L';
+  const pct = goal ? Math.min(ml / goal, 1) : 0;
+  $('#w-fill').style.width = pct * 100 + '%';
+  const done = goal && ml >= goal;
+  $('#water').classList.toggle('done', !!done);
+  $('#w-left').textContent = !goal ? '' : done ? 'Meta cumprida' : `faltam ${litres(goal - ml)} L`;
+  $('#w-undo').disabled = !waterLog().length;
+}
+$('#water').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-ml]');
+  if (b) return addWater(+b.dataset.ml);
+  if (e.target.closest('#w-undo')) return undoWater();
+  if (e.target.closest('#w-other')) {
+    const v = prompt('Quantos ml bebeste?');
+    if (v == null) return;
+    const ml = Math.round(num(v));
+    if (ml > 0 && ml <= 3000) addWater(ml); else toast('Indica um valor entre 1 e 3000 ml');
+  }
+});
 
 $('#prev-day').addEventListener('click', () => { viewDay = shiftKey(viewDay, -1); render(); });
 $('#next-day').addEventListener('click', () => { if (!isToday()) { viewDay = shiftKey(viewDay, 1); render(); } });
@@ -306,6 +421,7 @@ const METRIC = {
   p: { unit: ' g', goal: () => state.goal, better: 'up' },
   k: { unit: ' kcal', goal: () => state.goalKcal, better: 'down' },
   c: { unit: ' g', goal: () => state.goalCarbs, better: 'down' },
+  w: { unit: ' ml', goal: () => state.goalWater, better: 'up' },
 };
 $('#hist-seg').addEventListener('click', (e) => {
   const b = e.target.closest('[data-m]'); if (!b) return;
@@ -324,11 +440,13 @@ function renderHistory() {
   const bad = (v) => goal && m.better === 'down' && v > goal;
   $('#bars').innerHTML = (goal ? `<div class="goal" style="bottom:${(goal / max) * 100}%"><span>${goal}${m.unit}</span></div>` : '') +
     days.map((d, i) => `<button class="bar${ok(vals[i]) ? ' done' : ''}${bad(vals[i]) ? ' over' : ''}${dayKey(d) === tk ? ' today' : ''}" data-day="${dayKey(d)}" style="height:${(vals[i] / max) * 100}%" aria-label="${d.toLocaleDateString('pt-PT')}: ${Math.round(vals[i])}${m.unit}"></button>`).join('');
+  $('#bars').classList.toggle('is-water', histMetric === 'w');
   $('#barlabels').innerHTML = days.map((d) => `<span>${d.getDate()}</span>`).join('');
-  const logged = vals.filter((v, i) => entries(dayKey(days[i])).length);
+  const has = (i) => histMetric === 'w' ? waterLog(dayKey(days[i])).length : entries(dayKey(days[i])).length;
+  const logged = vals.filter((v, i) => has(i));
   $('#avg').textContent = logged.length ? Math.round(logged.reduce((a, b) => a + b, 0) / logged.length) + m.unit : '–';
   $('#hit-label').textContent = m.better === 'up' ? 'Dias com meta cumprida' : 'Dias dentro da meta';
-  $('#hit').textContent = goal ? vals.filter((v, i) => entries(dayKey(days[i])).length && ok(v)).length + ' / 14' : 'sem meta';
+  $('#hit').textContent = goal ? vals.filter((v, i) => has(i) && ok(v)).length + ' / 14' : 'sem meta';
 }
 $('#bars').addEventListener('click', (e) => {
   const b = e.target.closest('[data-day]'); if (!b) return;
@@ -343,12 +461,12 @@ function openAmount(pid, entry) {
   const hint = /\(cru|\(crua/.test(p.name) ? ' · pesa antes de cozinhar' : /cozid|cozinhad|grelhad|escorrid/.test(p.name) ? ' · pesa já pronto' : '';
   $('#a-sub').textContent = `${p.brand ? p.brand + ' · ' : ''}${per100(p)} por 100 g${hint}`;
   const opts = [];
-  const unitName = /^banana/i.test(p.name) ? ['1 banana', '2 bananas'] : /azeite|manteiga de amendoim/i.test(p.name) ? ['1 colher', '2 colheres'] : /iogurte/i.test(p.name) ? ['1 iogurte', '2 iogurtes'] : /atum em lata/i.test(p.name) ? ['1 lata', '2 latas'] : /claras/i.test(p.name) ? ['1 clara', '2 claras'] : /ovo/i.test(p.name) ? ['1 ovo', '2 ovos'] : /leite/i.test(p.name) ? ['1 copo', '2 copos'] : ['1 unidade', '2 unidades'];
+  const unitName = p.unitLabel ? p.unitLabel : /^banana/i.test(p.name) ? ['1 banana', '2 bananas'] : /azeite|manteiga de amendoim/i.test(p.name) ? ['1 colher', '2 colheres'] : /iogurte/i.test(p.name) ? ['1 iogurte', '2 iogurtes'] : /atum em lata/i.test(p.name) ? ['1 lata', '2 latas'] : /claras/i.test(p.name) ? ['1 clara', '2 claras'] : /ovo/i.test(p.name) ? ['1 ovo', '2 ovos'] : /leite/i.test(p.name) ? ['1 copo', '2 copos'] : ['1 unidade', '2 unidades'];
   if (p.unitG) opts.push([p.unitG, unitName[0]], [p.unitG * 2, unitName[1]]);
   if (/claras/i.test(p.name) && p.unitG) opts.push([p.unitG * 3, '3 claras'], [p.unitG * 4, '4 claras']);
   else if (/ovo/i.test(p.name) && p.unitG) opts.push([p.unitG * 3, '3 ovos'], [p.unitG * 4, '4 ovos']);
   if (p.lastGrams && p.lastGrams !== p.unitG) opts.push([p.lastGrams, `Última vez (${fmt(p.lastGrams, 0)} g)`]);
-  [100, 150, 200].forEach((g) => opts.push([g, g + ' g']));
+  (p.unitG && p.unitG < 50 ? [3, 5].map((n) => [p.unitG * n, unitName[1].replace(/^2/, n)]).concat([[50, '50 g'], [100, '100 g']]) : [[100], [150], [200]].map(([g]) => [g, g + ' g'])).forEach((o) => opts.push(o));
   const seen = new Set();
   $('#a-quick').innerHTML = opts.filter(([g]) => !seen.has(g) && seen.add(g)).map(([g, l]) => `<button class="chip" data-g="${g}">${l}</button>`).join('');
   $('#a-grams').value = entry ? entry.grams : (p.lastGrams || p.unitG || 100);
@@ -462,6 +580,7 @@ function openSettings() {
   $('#s-goal').value = state.goal;
   $('#s-kcal').value = state.goalKcal || '';
   $('#s-carbs').value = state.goalCarbs || '';
+  $('#s-water').value = state.goalWater || '';
   const le = state.lastExport;
   const days = le ? Math.floor((Date.now() - le) / 864e5) : null;
   $('#s-backup').textContent = le == null ? 'Ainda não fizeste nenhuma cópia.' : days === 0 ? 'Última cópia: hoje.' : `Última cópia: há ${days} dia${days > 1 ? 's' : ''}.`;
@@ -472,10 +591,12 @@ $('#s-save').addEventListener('click', () => {
   const g = Math.round(num($('#s-goal').value));
   const k = $('#s-kcal').value.trim() ? Math.round(num($('#s-kcal').value)) : null;
   const c = $('#s-carbs').value.trim() ? Math.round(num($('#s-carbs').value)) : null;
+  const wa = $('#s-water').value.trim() ? Math.round(num($('#s-water').value)) : null;
+  if (wa != null && !(wa >= 500 && wa <= 8000)) { toast('A meta de água tem de estar entre 500 e 8000 ml'); return; }
   if (!(g >= 10 && g <= 500)) { toast('A meta de proteína tem de estar entre 10 e 500 g'); return; }
   if (k != null && !(k >= 800 && k <= 8000)) { toast('A meta de calorias tem de estar entre 800 e 8000'); return; }
   if (c != null && !(c >= 10 && c <= 1000)) { toast('A meta de hidratos tem de estar entre 10 e 1000 g'); return; }
-  state.goal = g; state.goalKcal = k; state.goalCarbs = c;
+  state.goal = g; state.goalKcal = k; state.goalCarbs = c; state.goalWater = wa;
   save(); close('#dlg-settings'); render(); toast('Metas atualizadas');
 });
 $('#s-export').addEventListener('click', () => {
@@ -493,7 +614,7 @@ $('#import-file').addEventListener('change', async (e) => {
     if (!d.products || !d.log) throw new Error();
     if (!confirm('Substituir os dados deste telemóvel pelos do ficheiro?')) return;
     Object.keys(state).forEach((k) => delete state[k]);
-    Object.assign(state, { goal: 180, goalKcal: null, goalCarbs: null }, d);
+    Object.assign(state, { goal: 180, goalKcal: null, goalCarbs: null, goalWater: 2500, water: {} }, d);
     seedGeneric(); save(); close('#dlg-settings'); render(); toast('Dados importados');
   } catch { toast('Ficheiro inválido'); }
 });
