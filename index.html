@@ -17,7 +17,7 @@
 <style>
 :root{
   --bg:#E9EFEC; --surface:#F7FAF8; --ink:#16242E; --muted:#5B6C75; --line:#C7D2CD;
-  --fill:#2A6FA8; --fill-soft:#CFE1EF; --done:#2E8A57; --danger:#B3402E;
+  --fill:#2A6FA8; --fill-soft:#CFE1EF; --water:#3BA3C9; --done:#2E8A57; --danger:#B3402E;
   --font:"Archivo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   color-scheme:light;
   box-sizing:border-box;
@@ -26,7 +26,7 @@
 }
 @media (prefers-color-scheme:dark){
   :root{--bg:#0F1A22; --surface:#16242E; --ink:#E6EEEA; --muted:#93A5AE; --line:#2B3E4A;
-    --fill:#5FA6DD; --fill-soft:#1D3547; --done:#4FB57C; --danger:#E0725F; color-scheme:dark;}
+    --fill:#5FA6DD; --fill-soft:#1D3547; --water:#4FB8DC; --done:#4FB57C; --danger:#E0725F; color-scheme:dark;}
 }
 *,*::before,*::after{box-sizing:inherit}
 html,body{height:100%;margin:0}
@@ -148,6 +148,20 @@ label.f input:focus{border-color:var(--fill);outline:none}
 .meter .mfoot{font-size:13px;color:var(--muted);margin-top:4px}
 .meter.over .track div{background:var(--danger)}
 .meter.over .mfoot{color:var(--danger);font-weight:600}
+.water{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:12px;margin:0 0 18px}
+.water .whead{display:flex;justify-content:space-between;align-items:baseline}
+.water .whead > span{font-size:14px;color:var(--muted)}
+.water .whead b{font-size:26px;font-weight:750;font-stretch:70%;font-variant-numeric:tabular-nums}
+.water .whead b small{font-size:13px;font-weight:500;color:var(--muted)}
+.water .wtrack{height:10px;border-radius:5px;background:var(--line);margin:8px 0 4px;overflow:hidden}
+.water .wtrack div{height:100%;width:0;background:var(--water);border-radius:5px;transition:width .5s}
+.water.done .wtrack div{background:var(--done)}
+.water .wfoot{font-size:13px;color:var(--muted);min-height:1.2em}
+.water .wbtns{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;margin-top:10px}
+.water .wbtns button{border:1.5px solid var(--line);background:var(--bg);border-radius:11px;padding:9px 4px;font-size:14px;font-weight:600;line-height:1.2}
+.water .wbtns button small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.water .wbtns #w-undo{padding:9px 12px;font-size:18px}
+.water .wbtns button:disabled{opacity:.4}
 .link-btn{background:none;border:0;color:var(--fill);font-weight:600;padding:0;margin:-8px 0 16px;font-size:15px;text-align:left}
 .meal{margin-bottom:6px}
 .meal-head{display:flex;justify-content:space-between;font-size:14px;font-weight:650;color:var(--muted);padding:12px 0 2px;border-bottom:2px solid var(--ink)}
@@ -160,6 +174,8 @@ ul.list li[data-entry]{cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .bars .bar{border:0;padding:0}
 .bars .bar.over{background:var(--danger)}
+.bars.is-water .bar{background:var(--water)}
+.bars.is-water .bar.done{background:var(--done)}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .row3 label.f span{font-size:13px}
 .backup{font-size:14px;color:var(--muted);margin:0 0 4px}
@@ -197,6 +213,18 @@ ul.list li[data-entry]{cursor:pointer}
     <div class="meters" id="meters"></div>
     <button class="link-btn" id="set-goals" hidden>Definir metas de calorias e hidratos</button>
 
+    <div class="water" id="water">
+      <div class="whead"><span>Água</span><b><span id="w-total">0</span><small id="w-goal"> / 2,5 L</small></b></div>
+      <div class="wtrack"><div id="w-fill"></div></div>
+      <div class="wfoot" id="w-left"></div>
+      <div class="wbtns">
+        <button data-ml="250">+ Copo<small>250 ml</small></button>
+        <button data-ml="500">+ Garrafa<small>500 ml</small></button>
+        <button id="w-other">Outro<small>valor</small></button>
+        <button id="w-undo" aria-label="Desfazer último registo de água">↶</button>
+      </div>
+    </div>
+
     <div class="actions">
       <button class="btn primary" id="scan-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>
@@ -227,7 +255,7 @@ ul.list li[data-entry]{cursor:pointer}
   <section id="tab-historico" hidden>
     <header class="top"><h1>Últimos 14 dias</h1></header>
     <div class="seg" id="hist-seg" role="group" aria-label="Métrica">
-      <button data-m="p" aria-pressed="true">Proteína</button><button data-m="k" aria-pressed="false">Calorias</button><button data-m="c" aria-pressed="false">Hidratos</button>
+      <button data-m="p" aria-pressed="true">Proteína</button><button data-m="k" aria-pressed="false">Calorias</button><button data-m="c" aria-pressed="false">Hidratos</button><button data-m="w" aria-pressed="false">Água</button>
     </div>
     <div class="bars" id="bars"></div>
     <div class="barlabels" id="barlabels"></div>
@@ -339,6 +367,7 @@ ul.list li[data-entry]{cursor:pointer}
     <label class="f"><span>Calorias (kcal)</span><input id="s-kcal" inputmode="numeric" placeholder="sem meta"></label>
     <label class="f"><span>Hidratos (g)</span><input id="s-carbs" inputmode="numeric" placeholder="sem meta"></label>
   </div>
+  <label class="f"><span>Água (ml)</span><input id="s-water" inputmode="numeric" placeholder="sem meta"></label>
   <p class="lede">Nas calorias e hidratos, a meta funciona como limite: a barra fica vermelha se passares.</p>
   <h2>Cópia de segurança</h2>
   <p class="lede">Os dados ficam só neste telemóvel. Exporta de vez em quando para não perderes os produtos.</p>
