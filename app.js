@@ -3,6 +3,15 @@
 /* ---------- Dados ---------- */
 const KEY = 'proteina.v1';
 const $ = (s) => document.querySelector(s);
+
+// Se o index.html e o app.js forem de versões diferentes, avisa em vez de ficar tudo parado.
+(function checkVersion() {
+  const need = ['water', 'meters', 'hist-seg', 'q-meals', 'a-meals', 's-water'];
+  const missing = need.filter((id) => !document.getElementById(id));
+  if (!missing.length) return;
+  document.body.insertAdjacentHTML('afterbegin', '<div style="position:fixed;inset:0;z-index:99;background:#16242E;color:#E6EEEA;padding:40px 24px;font:17px/1.5 system-ui"><h2 style="margin-top:0">Atualização incompleta</h2><p>O <b>index.html</b> e o <b>app.js</b> são de versões diferentes. Envia o index.html mais recente para o GitHub, espera 2 minutos e reabre a app.</p><p style="opacity:.7">Os teus dados estão guardados e não se perderam.</p></div>');
+  throw new Error('Versões diferentes: faltam ' + missing.join(', '));
+})();
 const state = load();
 
 function load() {
