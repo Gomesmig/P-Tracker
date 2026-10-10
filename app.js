@@ -480,26 +480,68 @@ function portionsOf(p) {
   if (p.lastGrams) out.add(p.lastGrams);
   return [...out];
 }
+/* Tipo de alimento -> refeições onde faz sentido sugeri-lo (quando ainda não há histórico). */
+const MEAL_FIT = {
+  main: ['al', 'ja'],                    // carne, peixe, leguminosas, acompanhamentos
+  eggs: ['pa', 'al', 'la', 'ja'],
+  dairy: ['pa', 'al', 'la', 'ja', 'ce'], // lacticínios e batidos proteicos
+  light: ['pa', 'la', 'ce'],             // fruta, frutos secos, doces
+  bread: ['pa', 'la'],                   // pão, aveia, fiambre, presunto
+  other: ['pa', 'al', 'la', 'ja', 'ce'],
+};
+function foodKind(p) {
+  const t = (p.id + ' ' + p.name).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (/skyr|iogurte|yogurt|kefir|queijo|requeijao|leite|mozzarella|flamengo|parmesao|pudding|pudim|drink|batido|shake|whey|protein/.test(t)) return 'dairy';
+  if (/\bovo|claras/.test(t)) return 'eggs';
+  if (/frango|peru|vitela|vaca|picada|porco|atum|salmao|pescada|bacalhau|dourada|robalo|camarao|polvo|borrego|figado|hamburguer|sardinha|carapau|cavala|lulas|mexilhao|lentilhas|grao|feijao|tofu|arroz|massa|batata|quinoa|cuscuz|sopa|brocolos|espinafres|ervilhas|couve|cogumelos|abobora|milho/.test(t)) return 'main';
+  if (/nozes|cajus|avelas|pistacios|frutos secos|amendo|sementes|chia|linhaca|tamaras|passas|figo|damasco|banana|maca|pera|laranja|tangerina|kiwi|morango|uvas|melancia|melao|abacate|ananas|manga|pessego|ameixa|cereja|mirtilo|framboesa|diospiro|roma|chocolate|mel\b/.test(t)) return 'light';
+  if (/pao|broa|aveia|fiambre|presunto|chourico|manteiga/.test(t)) return 'bread';
+  return 'other';
+}
+/* Em que refeições comes cada produto (últimos 60 dias). */
+function mealStats() {
+  const out = {};
+  for (let i = 0; i < 60; i++) {
+    for (const e of entries(shiftKey(dayKey(), -i))) {
+      if (!e.pid) continue;
+      const m = e.meal || mealFor(e.t);
+      const st = (out[e.pid] = out[e.pid] || { total: 0 });
+      st[m] = (st[m] || 0) + 1; st.total++;
+    }
+  }
+  return out;
+}
 function closeSuggestions() {
   const t = totals();
   const rp = state.goal - t.p;
   if (rp < 3) return [];
   const rk = state.goalKcal ? state.goalKcal - t.k : null;
   const rc = state.goalCarbs ? state.goalCarbs - t.c : null;
-  const late = mealFor(Date.now()) === 'ce';
+  const meal = mealFor(Date.now());
+  const late = meal === 'ce';
+  const stats = mealStats();
 
-  const usable = Object.values(state.products).filter((p) => p.p100 >= 5 && p.k100 != null);
+  // Um alimento serve para esta refeição? Primeiro pelo teu histórico, depois pelo tipo de alimento.
+  const fit = (p) => {
+    const st = stats[p.id];
+    if (st && st.total >= 3) return st[meal] ? 1 : 0;              // já o comeste muitas vezes, mas nunca a esta refeição
+    return MEAL_FIT[foodKind(p)].includes(meal) ? 1 : 0;
+  };
+  const minP = (p) => (foodKind(p) === 'dairy' ? 3 : 5);
+  const usable = Object.values(state.products).filter((p) => p.k100 != null && p.p100 >= minP(p) && fit(p));
   const favs = usable.filter((p) => p.uses).sort((a, b) => b.uses - a.uses).slice(0, 12);
   const favIds = new Set(favs.map((p) => p.id));
   const lean = usable
-    .filter((p) => !favIds.has(p.id) && p.generic && p.p100 >= 15 && !/\(cru|\(crua/.test(p.name))
+    .filter((p) => !favIds.has(p.id) && p.generic && (p.p100 >= 8 || foodKind(p) === 'dairy') && !/\(cru|\(crua/.test(p.name))
     .sort((a, b) => b.p100 / b.k100 - a.p100 / a.k100).slice(0, 8);
 
   const opts = [];
   for (const p of [...favs, ...lean]) {
+    const st = stats[p.id];
+    const habit = st && st.total ? (st[meal] || 0) / st.total : 0; // fração das vezes que o comes a esta refeição
     for (const g of portionsOf(p)) {
       const m = macros(p, g);
-      opts.push({ p, g, P: m.protein, K: m.kcal || 0, C: m.carbs || 0, fav: Math.min(p.uses || 0, 8) });
+      opts.push({ p, g, P: m.protein, K: m.kcal || 0, C: m.carbs || 0, fav: Math.min(p.uses || 0, 8), habit });
     }
   }
   const score = (items) => {
@@ -511,6 +553,7 @@ function closeSuggestions() {
     if (rc != null) sc += Math.max(0, C - Math.max(rc, 0)) * 0.8;  // nem os hidratos
     if (late) sc += Math.max(0, K - 350) / 40;                      // à noite, coisas leves
     sc -= items.reduce((s, i) => s + i.fav, 0) * 0.45 / items.length; // o que costumas comer
+    sc -= items.reduce((s, i) => s + i.habit, 0) * 2 / items.length;   // ...e a esta hora
     sc += items.filter((i) => !i.fav).length * 3;                   // novidades só se compensarem
     sc += (items.length - 1) * 3;                                   // uma coisa é mais simples que duas
     items.forEach((i) => { if (i.g > 350 && !(i.p.unitG && i.g === i.p.unitG)) sc += (i.g - 350) / 15; }); // porções exageradas (1 embalagem não conta)
@@ -530,7 +573,7 @@ function closeSuggestions() {
     picked.push(pl); ids.forEach((id) => used.add(id));
     if (picked.length === 3) break;
   }
-  return picked.map((pl) => ({ ...pl, rk, rc }));
+  return picked.map((pl) => ({ ...pl, rk, rc, meal }));
 }
 let closePlans = [];
 function renderCloser() {
@@ -539,7 +582,7 @@ function renderCloser() {
   closePlans = isToday() ? closeSuggestions() : [];
   wrap.hidden = !closePlans.length;
   if (!closePlans.length) return;
-  $('#close-head').textContent = `Para fechar os ${rp} g que faltam`;
+  $('#close-head').textContent = `Para fechar os ${rp} g · ideias para ${{ pa: 'o pequeno-almoço', al: 'o almoço', la: 'o lanche', ja: 'o jantar', ce: 'a ceia' }[closePlans[0].meal]}`;
   $('#close-list').innerHTML = closePlans.map((pl, i) => {
     const name = pl.items.map((it) => esc(it.p.name.replace(/ \((cozinhad[oa]|cozid[oa]|grelhad[oa])\)$/, ''))).join(' + ');
     const qty = pl.items.map((it) => qtyText(it.p, it.g)).join(' + ');
