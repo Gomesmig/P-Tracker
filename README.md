@@ -11,7 +11,8 @@ Depois da primeira abertura, funciona sem rede. Só a pesquisa de produtos no Op
 
 ## Funcionalidades
 
-- **Metas diárias:** proteína e água (objetivos a atingir), calorias e hidratos (limites). Definem-se em Definições.
+- **Metas diárias:** proteína e água (objetivos a atingir), calorias e hidratos (limites). Definem-se no separador Definições, junto com a cópia de segurança.
+- **Para fechar o dia:** sugere 1 ou 2 alimentos, sobretudo dos teus favoritos, com porções que fecham a proteína em falta sem passar o que resta de calorias e hidratos. Um toque regista a sugestão.
 - **Código de barras:** leitura contínua pela câmara. Os produtos novos são pesquisados no Open Food Facts.
 - **Leitura da etiqueta:** tira foto à tabela nutricional para preencher proteína, calorias e hidratos por 100 g. O OCR corre no telemóvel.
 - **Alimentos sem código:** cerca de 120 alimentos comuns (carne, charcutaria, peixe, marisco, ovos, queijos, frutos secos, sementes, legumes, leguminosas, cereais, fruta…) com valores médios por 100 g, em versão crua ou cozinhada. Podes editá-los ou apagá-los.
@@ -21,7 +22,7 @@ Depois da primeira abertura, funciona sem rede. Só a pesquisa de produtos no Op
 - **Editar registos:** tocar num registo permite corrigir a quantidade ou a refeição.
 - **Outros dias:** as setas junto à data permitem ver ou registar noutro dia.
 - **Histórico:** gráfico dos últimos 14 dias de proteína, calorias, hidratos ou água. Tocar numa barra abre esse dia.
-- **Cópia de segurança:** Definições → Exportar / Importar, em ficheiro JSON.
+- **Cópia de segurança:** separador Definições → Exportar / Importar, em ficheiro JSON.
 
 ## Como funciona
 

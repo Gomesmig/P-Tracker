@@ -6,7 +6,7 @@ const $ = (s) => document.querySelector(s);
 
 // Se o index.html e o app.js forem de versões diferentes, avisa em vez de ficar tudo parado.
 (function checkVersion() {
-  const need = ['water', 'meters', 'hist-seg', 'q-meals', 'a-meals', 's-water'];
+  const need = ['water', 'meters', 'hist-seg', 'q-meals', 'a-meals', 's-water', 'close-list', 'tab-definicoes', 'hticks'];
   const missing = need.filter((id) => !document.getElementById(id));
   if (!missing.length) return;
   document.body.insertAdjacentHTML('afterbegin', '<div style="position:fixed;inset:0;z-index:99;background:#16242E;color:#E6EEEA;padding:40px 24px;font:17px/1.5 system-ui"><h2 style="margin-top:0">Atualização incompleta</h2><p>O <b>index.html</b> e o <b>app.js</b> são de versões diferentes. Envia o index.html mais recente para o GitHub, espera 2 minutos e reabre a app.</p><p style="opacity:.7">Os teus dados estão guardados e não se perderam.</p></div>');
@@ -267,7 +267,8 @@ document.querySelectorAll('dialog').forEach((d) => d.addEventListener('click', (
 document.querySelectorAll('nav.tabs button').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
 function showTab(name) {
   document.querySelectorAll('nav.tabs button').forEach((b) => { if (b.dataset.tab === name) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
-  ['hoje', 'produtos', 'historico'].forEach((t) => ($('#tab-' + t).hidden = t !== name));
+  ['hoje', 'produtos', 'historico', 'definicoes'].forEach((t) => ($('#tab-' + t).hidden = t !== name));
+  if (name === 'definicoes') fillSettings();
   render();
   window.scrollTo(0, 0);
 }
@@ -286,19 +287,18 @@ function render() { renderToday(); renderProducts(); renderHistory(); }
 
 function meterRow(label, value, goal, unit) {
   const v = Math.round(value);
-  if (!goal) return `<div class="meter"><div class="mhead"><span>${label}</span><b>${v}${unit}</b></div></div>`;
+  if (!goal) return `<div class="card"><span class="k">${label}</span><span class="v">${v}<small>${unit}</small></span><span class="foot">sem meta</span></div>`;
   const over = v > goal;
   const txt = over ? `+${v - goal}${unit} acima` : `restam ${goal - v}${unit}`;
-  return `<div class="meter${over ? ' over' : ''}"><div class="mhead"><span>${label}</span><b>${v}<small> / ${goal}${unit}</small></b></div>
-    <div class="track"><div style="width:${Math.min(v / goal, 1) * 100}%"></div></div><div class="mfoot">${txt}</div></div>`;
+  return `<div class="card${over ? ' over' : ''}"><span class="k">${label}</span><span class="v">${v}<small> / ${goal}${unit}</small></span>
+    <div class="bar"><div style="width:${Math.min(v / goal, 1) * 100}%"></div></div><span class="foot">${txt}</span></div>`;
 }
 
 function renderToday() {
   const goal = state.goal;
   const t = totals();
   const shown = Math.round(t.p);
-  const scale = goal * 1.1;
-  const pct = Math.min(t.p / scale, 1);
+  const pct = Math.min(t.p / goal, 1);
   const done = shown >= goal;
 
   const d = keyToDate(viewDay);
@@ -311,24 +311,21 @@ function renderToday() {
   $('#goal-label').textContent = goal;
   $('#left').textContent = done ? (shown > goal ? `Meta cumprida, +${shown - goal} g` : 'Meta cumprida') : `Faltam ${goal - shown} g`;
   $('#left').classList.toggle('done', done);
-  $('#liquid').style.height = pct * 100 + '%';
+  $('#liquid').style.width = pct * 100 + '%';
   $('#beaker').classList.toggle('done', done);
 
   const b = $('#beaker');
-  b.querySelectorAll('.tick').forEach((x) => x.remove());
-  const step = goal <= 100 ? 10 : 20;
-  for (let v = step; v <= goal; v += step) {
-    const tk = document.createElement('div');
-    const major = v % (step * 2) === 0 || v === goal;
-    tk.className = 'tick' + (major ? ' major' : '') + (v === goal ? ' goal' : '');
-    tk.style.bottom = (v / scale) * 100 + '%';
-    if (major) tk.innerHTML = `<span>${v}</span>`;
-    b.appendChild(tk);
+  if (b.dataset.goal !== String(goal)) { // marcas a 1/4, 1/2 e 3/4 da meta
+    b.dataset.goal = goal;
+    b.querySelectorAll('.tk').forEach((x) => x.remove());
+    [0.25, 0.5, 0.75].forEach((f) => { const tk = document.createElement('div'); tk.className = 'tk' + (f === 0.5 ? ' mid' : ''); tk.style.left = f * 100 + '%'; b.appendChild(tk); });
+    $('#hticks').innerHTML = [0.25, 0.5, 0.75, 1].map((f) => `<span style="left:${f * 100}%">${Math.round(goal * f)}</span>`).join('');
   }
 
   $('#meters').innerHTML = meterRow('Calorias', t.k, state.goalKcal, ' kcal') + meterRow('Hidratos', t.c, state.goalCarbs, ' g');
   $('#set-goals').hidden = !!(state.goalKcal && state.goalCarbs);
   renderWater();
+  renderCloser();
 
   const favs = Object.values(state.products).filter((p) => p.uses).sort((a, b) => b.uses - a.uses).slice(0, 8);
   $('#favs-wrap').hidden = !favs.length;
@@ -382,7 +379,7 @@ $('#water').addEventListener('click', (e) => {
 $('#prev-day').addEventListener('click', () => { viewDay = shiftKey(viewDay, -1); render(); });
 $('#next-day').addEventListener('click', () => { if (!isToday()) { viewDay = shiftKey(viewDay, 1); render(); } });
 $('#back-today').addEventListener('click', () => { viewDay = dayKey(); render(); });
-$('#set-goals').addEventListener('click', openSettings);
+$('#set-goals').addEventListener('click', () => showTab('definicoes'));
 
 $('#favs').addEventListener('click', (e) => {
   const b = e.target.closest('[data-fav]'); if (!b) return;
@@ -462,7 +459,116 @@ $('#bars').addEventListener('click', (e) => {
   viewDay = b.dataset.day; showTab('hoje');
 });
 
+/* ---------- Para fechar o dia ----------
+   Procura 1 ou 2 alimentos (dos teus favoritos e de proteínas magras) cujas porções
+   fecham a proteína que falta sem rebentar o que resta de calorias e hidratos. */
+function qtyText(p, g) {
+  if (p.unitG) {
+    const n = g / p.unitG;
+    if (Math.abs(n - Math.round(n)) < 0.01 && n >= 1) { const u = unitNames(p); return Math.round(n) === 1 ? u[0] : u[1].replace(/^2/, Math.round(n)); }
+  }
+  return fmt(g, 0) + ' g';
+}
+function portionsOf(p) {
+  const out = new Set();
+  if (p.unitG) {
+    const maxN = p.unitG <= 60 ? 4 : p.unitG >= 300 ? 1 : 3;
+    for (let n = 1; n <= maxN; n++) out.add(p.unitG * n);
+  } else {
+    [100, 150, 200, 250].forEach((g) => out.add(g));
+  }
+  if (p.lastGrams) out.add(p.lastGrams);
+  return [...out];
+}
+function closeSuggestions() {
+  const t = totals();
+  const rp = state.goal - t.p;
+  if (rp < 3) return [];
+  const rk = state.goalKcal ? state.goalKcal - t.k : null;
+  const rc = state.goalCarbs ? state.goalCarbs - t.c : null;
+  const late = mealFor(Date.now()) === 'ce';
+
+  const usable = Object.values(state.products).filter((p) => p.p100 >= 5 && p.k100 != null);
+  const favs = usable.filter((p) => p.uses).sort((a, b) => b.uses - a.uses).slice(0, 12);
+  const favIds = new Set(favs.map((p) => p.id));
+  const lean = usable
+    .filter((p) => !favIds.has(p.id) && p.generic && p.p100 >= 15 && !/\(cru|\(crua/.test(p.name))
+    .sort((a, b) => b.p100 / b.k100 - a.p100 / a.k100).slice(0, 8);
+
+  const opts = [];
+  for (const p of [...favs, ...lean]) {
+    for (const g of portionsOf(p)) {
+      const m = macros(p, g);
+      opts.push({ p, g, P: m.protein, K: m.kcal || 0, C: m.carbs || 0, fav: Math.min(p.uses || 0, 8) });
+    }
+  }
+  const score = (items) => {
+    const P = items.reduce((s, i) => s + i.P, 0), K = items.reduce((s, i) => s + i.K, 0), C = items.reduce((s, i) => s + i.C, 0);
+    const short = Math.max(0, rp - P), over = Math.max(0, P - rp);
+    let sc = Math.max(0, short - 2) * 1.2 + Math.max(0, over - 6) * 0.4; // fechar a proteína (±2 g), sem exagerar
+    if (rk != null) sc += Math.max(0, K - Math.max(rk, 0)) / 6;    // não passar as calorias que restam
+    sc += K / (rk != null ? 400 : 250);                             // preferir o mais magro
+    if (rc != null) sc += Math.max(0, C - Math.max(rc, 0)) * 0.8;  // nem os hidratos
+    if (late) sc += Math.max(0, K - 350) / 40;                      // à noite, coisas leves
+    sc -= items.reduce((s, i) => s + i.fav, 0) * 0.45 / items.length; // o que costumas comer
+    sc += items.filter((i) => !i.fav).length * 3;                   // novidades só se compensarem
+    sc += (items.length - 1) * 3;                                   // uma coisa é mais simples que duas
+    items.forEach((i) => { if (i.g > 350 && !(i.p.unitG && i.g === i.p.unitG)) sc += (i.g - 350) / 15; }); // porções exageradas (1 embalagem não conta)
+    return { items, P, K, C, short, sc };
+  };
+  const plans = opts.map((o) => score([o]));
+  const smalls = opts.filter((o) => o.P < rp - 3);
+  for (let i = 0; i < smalls.length; i++)
+    for (let j = i + 1; j < smalls.length; j++)
+      if (smalls[i].p.id !== smalls[j].p.id) plans.push(score([smalls[i], smalls[j]]));
+  plans.sort((a, b) => a.sc - b.sc);
+
+  const picked = [], used = new Set();
+  for (const pl of plans) {
+    const ids = pl.items.map((i) => i.p.id);
+    if (ids.some((id) => used.has(id))) continue; // variedade: cada alimento só numa sugestão
+    picked.push(pl); ids.forEach((id) => used.add(id));
+    if (picked.length === 3) break;
+  }
+  return picked.map((pl) => ({ ...pl, rk, rc }));
+}
+let closePlans = [];
+function renderCloser() {
+  const wrap = $('#close-wrap');
+  const rp = Math.round(state.goal - totals().p);
+  closePlans = isToday() ? closeSuggestions() : [];
+  wrap.hidden = !closePlans.length;
+  if (!closePlans.length) return;
+  $('#close-head').textContent = `Para fechar os ${rp} g que faltam`;
+  $('#close-list').innerHTML = closePlans.map((pl, i) => {
+    const name = pl.items.map((it) => esc(it.p.name.replace(/ \((cozinhad[oa]|cozid[oa]|grelhad[oa])\)$/, ''))).join(' + ');
+    const qty = pl.items.map((it) => qtyText(it.p, it.g)).join(' + ');
+    const status = pl.short <= 2 ? 'fecha a meta' : `faltam ainda ${Math.round(pl.short)} g`;
+    let kcal = `${Math.round(pl.K)} kcal`;
+    if (pl.rk != null) kcal += pl.K > pl.rk ? ` (passa ${Math.round(pl.K - Math.max(pl.rk, 0))})` : '';
+    return `<li><div class="main"><div class="name">${name}</div><div class="sub">${qty} · ${kcal} · ${status}</div></div>
+      <span class="gain">+${fmt(pl.P)} g</span>
+      <button data-plan="${i}" aria-label="Registar ${name}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button></li>`;
+  }).join('');
+}
+$('#close-list').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-plan]'); if (!b) return;
+  const pl = closePlans[+b.dataset.plan]; if (!pl) return;
+  const meal = mealFor(Date.now());
+  pl.items.forEach((it) => {
+    const k = viewDay;
+    (state.log[k] = state.log[k] || []).push({ id: uid(), t: entryTime(), meal, pid: it.p.id, name: it.p.name, grams: it.g, ...macros(it.p, it.g) });
+    it.p.uses = (it.p.uses || 0) + 1; it.p.lastGrams = it.g;
+  });
+  save(); render();
+  toast(`+${fmt(pl.P)} g de proteína`);
+});
+
 /* ---------- Quantidade ---------- */
+function unitNames(p) {
+  return p.unitLabel ? p.unitLabel : /^banana/i.test(p.name) ? ['1 banana', '2 bananas'] : /azeite|manteiga de amendoim/i.test(p.name) ? ['1 colher', '2 colheres'] : /iogurte/i.test(p.name) ? ['1 iogurte', '2 iogurtes'] : /atum em lata/i.test(p.name) ? ['1 lata', '2 latas'] : /claras/i.test(p.name) ? ['1 clara', '2 claras'] : /ovo/i.test(p.name) ? ['1 ovo', '2 ovos'] : /leite/i.test(p.name) ? ['1 copo', '2 copos'] : ['1 unidade', '2 unidades'];
+}
+
 let amountPid = null, amountEntry = null;
 function openAmount(pid, entry) {
   const p = state.products[pid]; amountPid = pid; amountEntry = entry || null;
@@ -470,7 +576,7 @@ function openAmount(pid, entry) {
   const hint = /\(cru|\(crua/.test(p.name) ? ' · pesa antes de cozinhar' : /cozid|cozinhad|grelhad|escorrid/.test(p.name) ? ' · pesa já pronto' : '';
   $('#a-sub').textContent = `${p.brand ? p.brand + ' · ' : ''}${per100(p)} por 100 g${hint}`;
   const opts = [];
-  const unitName = p.unitLabel ? p.unitLabel : /^banana/i.test(p.name) ? ['1 banana', '2 bananas'] : /azeite|manteiga de amendoim/i.test(p.name) ? ['1 colher', '2 colheres'] : /iogurte/i.test(p.name) ? ['1 iogurte', '2 iogurtes'] : /atum em lata/i.test(p.name) ? ['1 lata', '2 latas'] : /claras/i.test(p.name) ? ['1 clara', '2 claras'] : /ovo/i.test(p.name) ? ['1 ovo', '2 ovos'] : /leite/i.test(p.name) ? ['1 copo', '2 copos'] : ['1 unidade', '2 unidades'];
+  const unitName = unitNames(p);
   if (p.unitG) opts.push([p.unitG, unitName[0]], [p.unitG * 2, unitName[1]]);
   if (/claras/i.test(p.name) && p.unitG) opts.push([p.unitG * 3, '3 claras'], [p.unitG * 4, '4 claras']);
   else if (/ovo/i.test(p.name) && p.unitG) opts.push([p.unitG * 3, '3 ovos'], [p.unitG * 4, '4 ovos']);
@@ -584,8 +690,7 @@ $('#q-save').addEventListener('click', () => {
 });
 
 /* ---------- Definições ---------- */
-$('#open-settings').addEventListener('click', openSettings);
-function openSettings() {
+function fillSettings() {
   $('#s-goal').value = state.goal;
   $('#s-kcal').value = state.goalKcal || '';
   $('#s-carbs').value = state.goalCarbs || '';
@@ -594,7 +699,6 @@ function openSettings() {
   const days = le ? Math.floor((Date.now() - le) / 864e5) : null;
   $('#s-backup').textContent = le == null ? 'Ainda não fizeste nenhuma cópia.' : days === 0 ? 'Última cópia: hoje.' : `Última cópia: há ${days} dia${days > 1 ? 's' : ''}.`;
   $('#s-backup').classList.toggle('warn', le == null || days > 14);
-  open('#dlg-settings');
 }
 $('#s-save').addEventListener('click', () => {
   const g = Math.round(num($('#s-goal').value));
@@ -606,7 +710,7 @@ $('#s-save').addEventListener('click', () => {
   if (k != null && !(k >= 800 && k <= 8000)) { toast('A meta de calorias tem de estar entre 800 e 8000'); return; }
   if (c != null && !(c >= 10 && c <= 1000)) { toast('A meta de hidratos tem de estar entre 10 e 1000 g'); return; }
   state.goal = g; state.goalKcal = k; state.goalCarbs = c; state.goalWater = wa;
-  save(); close('#dlg-settings'); render(); toast('Metas atualizadas');
+  save(); render(); toast('Metas guardadas');
 });
 $('#s-export').addEventListener('click', () => {
   state.lastExport = Date.now(); save();
@@ -624,7 +728,7 @@ $('#import-file').addEventListener('change', async (e) => {
     if (!confirm('Substituir os dados deste telemóvel pelos do ficheiro?')) return;
     Object.keys(state).forEach((k) => delete state[k]);
     Object.assign(state, { goal: 180, goalKcal: null, goalCarbs: null, goalWater: 2500, water: {} }, d);
-    seedGeneric(); save(); close('#dlg-settings'); render(); toast('Dados importados');
+    seedGeneric(); save(); render(); fillSettings(); toast('Dados importados');
   } catch { toast('Ficheiro inválido'); }
 });
 

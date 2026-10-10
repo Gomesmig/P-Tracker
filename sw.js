@@ -1,7 +1,7 @@
 // Guarda a app no telemóvel para funcionar sem rede.
 // HTML/JS: rede primeiro (apanha sempre a versão mais recente), cache se não houver rede.
 // Bibliotecas e ícones: cache primeiro (são grandes e não mudam).
-const VERSION = 'proteina-v8';
+const VERSION = 'proteina-v9';
 const CORE = ['./', 'index.html', 'app.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'lib/zxing.min.js'];
 const OCR = ['lib/tesseract.min.js', 'lib/worker.min.js', 'lib/core/tesseract-core-simd-lstm.wasm.js', 'lib/core/tesseract-core-lstm.wasm.js', 'lib/lang/por.traineddata.gz'];
 

@@ -180,6 +180,65 @@ ul.list li[data-entry]{cursor:pointer}
 .row3 label.f span{font-size:13px}
 .backup{font-size:14px;color:var(--muted);margin:0 0 4px}
 .backup.warn{color:var(--danger);font-weight:600}
+
+/* ---- v9: layout A ---- */
+.hero{display:flex;flex-direction:column;gap:10px;padding:6px 0 16px}
+.hero-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.hero .num{font-size:88px;line-height:.82;font-weight:800;font-stretch:62%;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.hero .num small{font-size:34px;font-weight:700;font-stretch:70%;margin-left:4px}
+.hero-side{text-align:right;padding-bottom:2px}
+.hero .of{font-size:14px;color:var(--muted)}
+.hero .left{font-size:22px;font-weight:700;font-stretch:85%}
+.hero .left.done{color:var(--done)}
+.hbeaker{position:relative;height:30px;border:2.5px solid var(--ink);border-radius:10px;overflow:hidden;background:var(--surface)}
+.hbeaker .liquid{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--fill);transition:width .7s cubic-bezier(.2,.8,.2,1),background .4s}
+.hbeaker.done .liquid{background:var(--done)}
+.hbeaker .tk{position:absolute;top:0;height:9px;border-left:2px solid var(--ink);z-index:2}
+.hbeaker .tk.mid{height:13px}
+.hticks{position:relative;height:14px;margin-top:-6px;font-size:11px;font-weight:600;font-stretch:75%;color:var(--muted)}
+.hticks span{position:absolute;transform:translateX(-50%)}
+.hticks span:last-child{transform:translateX(-100%)}
+.cards2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:8px}
+.card{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:1px}
+.card .k{font-size:13px;color:var(--muted)}
+.card .v{font-size:24px;font-weight:750;font-stretch:65%;line-height:1.15;font-variant-numeric:tabular-nums}
+.card .v small{font-size:13px;font-weight:500;color:var(--muted)}
+.card .bar{height:5px;border-radius:3px;background:var(--line);margin-top:7px;overflow:hidden}
+.card .bar div{height:100%;background:var(--ink);transition:width .5s}
+.card .foot{font-size:12px;color:var(--muted);margin-top:3px}
+.card.over .bar div{background:var(--danger)}
+.card.over .foot{color:var(--danger);font-weight:600}
+.water{padding:10px 12px;margin:0 0 16px}
+.water .wrow{display:flex;align-items:center;gap:10px}
+.water .drop{width:18px;height:18px;color:var(--water);flex:0 0 auto}
+.water .wlabel{font-size:13px;color:var(--muted)}
+.water .wtrack{flex:1;height:6px;margin:0;background:color-mix(in srgb,var(--water) 18%,var(--line))}
+.water .wrow b{font-size:18px;font-weight:750;font-stretch:70%;white-space:nowrap;font-variant-numeric:tabular-nums}
+.water .wrow b small{font-size:12px;font-weight:500;color:var(--muted)}
+.water .wbtns{grid-template-columns:repeat(3,minmax(0,1fr)) 44px;gap:6px;margin-top:8px}
+.water .wbtns button{height:44px;padding:0 4px;font-size:14px;display:flex;align-items:center;justify-content:center;gap:4px}
+.water .wbtns button small{display:inline;font-size:12px}
+.water .wbtns .plus{color:var(--water);font-weight:700}
+.water .wbtns #w-undo{padding:0;font-size:inherit;color:var(--muted)}
+.water .wbtns #w-undo svg{width:18px;height:18px}
+.searchrow{display:flex;gap:8px;margin-bottom:14px}
+.searchpill{flex:1;height:52px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);display:flex;align-items:center;gap:10px;padding:0 14px;color:var(--muted);text-align:left}
+.searchpill svg{width:20px;height:20px}
+.scanbtn{width:52px;height:52px;border-radius:14px;border:0;background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.scanbtn svg{width:24px;height:24px}
+.closer{background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:4px 14px;margin-bottom:6px}
+.closer-head{font-size:13px;font-weight:650;color:var(--muted);padding:10px 0 2px}
+.closer-list{list-style:none;margin:0;padding:0}
+.closer-list li{display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--line)}
+.closer-list li:first-child{border-top:0}
+.closer-list .main{flex:1;min-width:0}
+.closer-list .name{font-weight:600;font-size:15px;line-height:1.3}
+.closer-list .sub{font-size:13px;color:var(--muted)}
+.closer-list .gain{font-size:18px;font-weight:750;font-stretch:75%;color:var(--fill);white-space:nowrap}
+.closer-list button{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.closer-list button svg{width:18px;height:18px}
+.btn.wide{width:100%;margin-top:6px}
+#tab-definicoes h2{margin-top:18px}
 .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -196,41 +255,52 @@ ul.list li[data-entry]{cursor:pointer}
         <button class="icon-btn" id="next-day" aria-label="Dia seguinte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
         <button class="pill" id="back-today" hidden>Hoje</button>
       </div>
-      <button class="icon-btn" id="open-settings" aria-label="Definições">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
-      </button>
     </header>
 
-    <div class="gauge">
-      <div class="beaker" id="beaker" aria-hidden="true"><div class="liquid" id="liquid"></div></div>
-      <div class="readout" aria-live="polite">
+    <div class="hero" aria-live="polite">
+      <div class="hero-row">
         <div class="num"><span id="total">0</span><small>g</small></div>
-        <div class="of">de <span id="goal-label">180</span> g de proteína</div>
-        <div class="left" id="left">Faltam 180 g</div>
+        <div class="hero-side">
+          <div class="of">de <span id="goal-label">180</span> g de proteína</div>
+          <div class="left" id="left">Faltam 180 g</div>
+        </div>
       </div>
+      <div class="hbeaker" id="beaker" aria-hidden="true"><div class="liquid" id="liquid"></div></div>
+      <div class="hticks" id="hticks" aria-hidden="true"></div>
     </div>
 
-    <div class="meters" id="meters"></div>
+    <div class="cards2" id="meters"></div>
     <button class="link-btn" id="set-goals" hidden>Definir metas de calorias e hidratos</button>
 
     <div class="water" id="water">
-      <div class="whead"><span>Água</span><b><span id="w-total">0</span><small id="w-goal"> / 2,5 L</small></b></div>
-      <div class="wtrack"><div id="w-fill"></div></div>
-      <div class="wfoot" id="w-left"></div>
+      <div class="wrow">
+        <svg class="drop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg>
+        <span class="wlabel">Água</span>
+        <div class="wtrack"><div id="w-fill"></div></div>
+        <b><span id="w-total">0</span><small id="w-goal"> / 2,5 L</small></b>
+      </div>
+      <span class="visually-hidden" id="w-left"></span>
       <div class="wbtns">
-        <button data-ml="250">+ Copo<small>250 ml</small></button>
-        <button data-ml="500">+ Garrafa<small>500 ml</small></button>
-        <button id="w-other">Outro<small>valor</small></button>
-        <button id="w-undo" aria-label="Desfazer último registo de água">↶</button>
+        <button data-ml="250"><span class="plus">+</span>Copo <small>250</small></button>
+        <button data-ml="500"><span class="plus">+</span>Garrafa <small>500</small></button>
+        <button id="w-other">Outro</button>
+        <button id="w-undo" aria-label="Desfazer último registo de água"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
       </div>
     </div>
 
-    <div class="actions">
-      <button class="btn primary" id="scan-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>
-        Ler código
+    <div class="searchrow">
+      <button class="searchpill" id="add-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        O que comeste?
       </button>
-      <button class="btn" id="add-btn">Adicionar</button>
+      <button class="scanbtn" id="scan-btn" aria-label="Ler código de barras">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>
+      </button>
+    </div>
+
+    <div class="closer" id="close-wrap" hidden>
+      <div class="closer-head" id="close-head">Para fechar o dia</div>
+      <ul class="closer-list" id="close-list"></ul>
     </div>
 
     <div id="favs-wrap" hidden>
@@ -264,6 +334,28 @@ ul.list li[data-entry]{cursor:pointer}
       <div class="stat"><div class="k" id="hit-label">Dias com meta cumprida</div><div class="v" id="hit">0</div></div>
     </div>
   </section>
+
+  <!-- DEFINIÇÕES -->
+  <section id="tab-definicoes" hidden>
+    <header class="top"><h1>Definições</h1></header>
+    <h2>Metas diárias</h2>
+    <div class="row">
+      <label class="f"><span>Proteína (g)</span><input id="s-goal" inputmode="numeric"></label>
+      <label class="f"><span>Água (ml)</span><input id="s-water" inputmode="numeric" placeholder="sem meta"></label>
+    </div>
+    <div class="row">
+      <label class="f"><span>Calorias (kcal)</span><input id="s-kcal" inputmode="numeric" placeholder="sem meta"></label>
+      <label class="f"><span>Hidratos (g)</span><input id="s-carbs" inputmode="numeric" placeholder="sem meta"></label>
+    </div>
+    <p class="lede">Proteína e água são objetivos a atingir. Calorias e hidratos funcionam como limite: ficam a vermelho se passares.</p>
+    <button class="btn primary wide" id="s-save">Guardar metas</button>
+
+    <h2>Cópia de segurança</h2>
+    <p class="lede">Os dados ficam só neste telemóvel. Exporta de vez em quando para não perderes os produtos e registos.</p>
+    <p class="backup" id="s-backup"></p>
+    <div class="btns"><button class="btn" id="s-export">Exportar</button><button class="btn" id="s-import">Importar</button></div>
+    <input type="file" accept="application/json,.json" id="import-file" hidden>
+  </section>
 </div>
 
 <nav class="tabs"><div class="in">
@@ -273,6 +365,8 @@ ul.list li[data-entry]{cursor:pointer}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Produtos</button>
   <button data-tab="historico">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V11M10 20V5M15 20v-7M20 20V8"/></svg>Histórico</button>
+  <button data-tab="definicoes">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>Definições</button>
 </div></nav>
 
 <!-- Scanner -->
@@ -357,24 +451,6 @@ ul.list li[data-entry]{cursor:pointer}
   <label class="f"><span>Descrição</span><input id="q-desc" placeholder="ex: Almoço no restaurante"></label>
   <div class="quick" id="q-meals" role="group" aria-label="Refeição"></div>
   <div class="btns"><button class="btn" data-close>Cancelar</button><button class="btn primary" id="q-save">Registar</button></div>
-</div></dialog>
-
-<!-- Definições -->
-<dialog id="dlg-settings"><div class="body">
-  <h3>Metas diárias</h3>
-  <label class="f"><span>Proteína (g)</span><input id="s-goal" inputmode="numeric"></label>
-  <div class="row">
-    <label class="f"><span>Calorias (kcal)</span><input id="s-kcal" inputmode="numeric" placeholder="sem meta"></label>
-    <label class="f"><span>Hidratos (g)</span><input id="s-carbs" inputmode="numeric" placeholder="sem meta"></label>
-  </div>
-  <label class="f"><span>Água (ml)</span><input id="s-water" inputmode="numeric" placeholder="sem meta"></label>
-  <p class="lede">Nas calorias e hidratos, a meta funciona como limite: a barra fica vermelha se passares.</p>
-  <h2>Cópia de segurança</h2>
-  <p class="lede">Os dados ficam só neste telemóvel. Exporta de vez em quando para não perderes os produtos.</p>
-  <p class="backup" id="s-backup"></p>
-  <div class="btns"><button class="btn" id="s-export">Exportar</button><button class="btn" id="s-import">Importar</button></div>
-  <input type="file" accept="application/json,.json" id="import-file" hidden>
-  <div class="btns"><button class="btn" data-close>Fechar</button><button class="btn primary" id="s-save">Guardar</button></div>
 </div></dialog>
 
 <div class="toast" id="toast" role="status"></div>
