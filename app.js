@@ -6,7 +6,7 @@ const $ = (s) => document.querySelector(s);
 
 // Se o index.html e o app.js forem de versões diferentes, avisa em vez de ficar tudo parado.
 (function checkVersion() {
-  const need = ['water', 'meters', 'hist-seg', 'q-meals', 'a-meals', 's-water', 'close-list', 'tab-definicoes', 'hticks'];
+  const need = ['water', 'meters', 'hist-seg', 'q-meals', 'a-meals', 's-water', 'close-list', 'tab-definicoes', 'hticks', 'qr-box'];
   const missing = need.filter((id) => !document.getElementById(id));
   if (!missing.length) return;
   document.body.insertAdjacentHTML('afterbegin', '<div style="position:fixed;inset:0;z-index:99;background:#16242E;color:#E6EEEA;padding:40px 24px;font:17px/1.5 system-ui"><h2 style="margin-top:0">Atualização incompleta</h2><p>O <b>index.html</b> e o <b>app.js</b> são de versões diferentes. Envia o index.html mais recente para o GitHub, espera 2 minutos e reabre a app.</p><p style="opacity:.7">Os teus dados estão guardados e não se perderam.</p></div>');
@@ -733,7 +733,33 @@ $('#q-save').addEventListener('click', () => {
 });
 
 /* ---------- Definições ---------- */
+/* ---------- Partilhar ---------- */
+const appUrl = () => location.origin + location.pathname.replace(/index\.html$/, '');
+function renderShare() {
+  const url = appUrl();
+  $('#share-url').textContent = url.replace(/^https?:\/\//, '');
+  const box = $('#qr-box');
+  if (box.dataset.url === url) return;
+  if (typeof qrcode !== 'function') { box.textContent = 'Código QR indisponível'; return; }
+  const qr = qrcode(0, 'M'); qr.addData(url); qr.make();
+  const n = qr.getModuleCount(); let d = '';
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (qr.isDark(r, c)) d += `M${c} ${r}h1v1h-1z`;
+  box.innerHTML = `<svg viewBox="0 0 ${n} ${n}" shape-rendering="crispEdges" aria-hidden="true"><path d="${d}" fill="#0F1A22"/></svg>`;
+  box.dataset.url = url;
+}
+async function copyLink() {
+  try { await navigator.clipboard.writeText(appUrl()); toast('Link copiado'); }
+  catch { prompt('Copia o link:', appUrl()); }
+}
+$('#copy-link').addEventListener('click', copyLink);
+$('#share-link').addEventListener('click', async () => {
+  if (navigator.share) {
+    try { await navigator.share({ title: 'Proteína', text: 'App para registar proteína, calorias e água', url: appUrl() }); } catch {}
+  } else copyLink();
+});
+
 function fillSettings() {
+  renderShare();
   $('#s-goal').value = state.goal;
   $('#s-kcal').value = state.goalKcal || '';
   $('#s-carbs').value = state.goalCarbs || '';

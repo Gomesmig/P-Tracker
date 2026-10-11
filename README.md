@@ -22,6 +22,7 @@ Depois da primeira abertura, funciona sem rede. Só a pesquisa de produtos no Op
 - **Editar registos:** tocar num registo permite corrigir a quantidade ou a refeição.
 - **Outros dias:** as setas junto à data permitem ver ou registar noutro dia.
 - **Histórico:** gráfico dos últimos 14 dias de proteína, calorias, hidratos ou água. Tocar numa barra abre esse dia.
+- **Partilhar:** em Definições há um código QR e um botão para enviar o link da app a outras pessoas (cada uma fica com os seus dados).
 - **Cópia de segurança:** separador Definições → Exportar / Importar, em ficheiro JSON.
 
 ## Como funciona
@@ -34,4 +35,5 @@ Depois da primeira abertura, funciona sem rede. Só a pesquisa de produtos no Op
 ## Bibliotecas incluídas (em `lib/`)
 
 - ZXing (Apache 2.0)
+- qrcode-generator (MIT)
 - Tesseract.js, tesseract.js-core e dados de português (Apache 2.0)

@@ -239,6 +239,11 @@ ul.list li[data-entry]{cursor:pointer}
 .closer-list button svg{width:18px;height:18px}
 .btn.wide{width:100%;margin-top:6px}
 #tab-definicoes h2{margin-top:18px}
+.share{display:flex;flex-direction:column;align-items:center}
+.share .qr{background:#fff;padding:14px;border-radius:16px;width:220px;height:220px;box-sizing:border-box}
+.share .qr svg{display:block;width:100%;height:100%}
+.share-url{font-size:14px;color:var(--muted);margin:10px 0 0;word-break:break-all;text-align:center}
+.share .btns{width:100%}
 .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -350,6 +355,14 @@ ul.list li[data-entry]{cursor:pointer}
     <p class="lede">Proteína e água são objetivos a atingir. Calorias e hidratos funcionam como limite: ficam a vermelho se passares.</p>
     <button class="btn primary wide" id="s-save">Guardar metas</button>
 
+    <h2>Partilhar a app</h2>
+    <p class="lede">Quem ler este código com a câmara abre a app no telemóvel dele. Cada pessoa fica com os seus próprios dados: os teus não são partilhados.</p>
+    <div class="share">
+      <div class="qr" id="qr-box" role="img" aria-label="Código QR com o link da app"></div>
+      <p class="share-url" id="share-url"></p>
+      <div class="btns"><button class="btn" id="share-link">Partilhar link</button><button class="btn" id="copy-link">Copiar link</button></div>
+    </div>
+
     <h2>Cópia de segurança</h2>
     <p class="lede">Os dados ficam só neste telemóvel. Exporta de vez em quando para não perderes os produtos e registos.</p>
     <p class="backup" id="s-backup"></p>
@@ -456,6 +469,7 @@ ul.list li[data-entry]{cursor:pointer}
 <div class="toast" id="toast" role="status"></div>
 
 <script src="lib/zxing.min.js" defer></script>
+<script src="lib/qrcode.js" defer></script>
 <script src="app.js" defer></script>
 </body>
 </html>
