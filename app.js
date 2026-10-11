@@ -472,12 +472,18 @@ function qtyText(p, g) {
 function portionsOf(p) {
   const out = new Set();
   if (p.unitG) {
-    const maxN = p.unitG <= 60 ? 4 : p.unitG >= 300 ? 1 : 3;
+    const kind = foodKind(p);
+    // ovos até 4; coisas pequenas (fatias, colheres, mãos-cheias) até 3; o resto até 2 (ninguém come 4 barras)
+    const maxN = kind === 'eggs' ? 4 : p.unitG >= 300 ? 1 : p.unitG < 50 ? 3 : 2;
     for (let n = 1; n <= maxN; n++) out.add(p.unitG * n);
+  } else if (p.p100 >= 50) {
+    [25, 30, 40].forEach((g) => out.add(g));            // pós proteicos (whey, isolado)
+  } else if (p.k100 >= 350) {
+    [30, 50, 80].forEach((g) => out.add(g));            // muito calóricos: frutos secos, barras, cereais
   } else {
     [100, 150, 200, 250].forEach((g) => out.add(g));
   }
-  if (p.lastGrams) out.add(p.lastGrams);
+  if (p.lastGrams && (!p.unitG || p.lastGrams <= p.unitG * 2)) out.add(p.lastGrams);
   return [...out];
 }
 /* Tipo de alimento -> refeições onde faz sentido sugeri-lo (quando ainda não há histórico). */
@@ -511,15 +517,23 @@ function mealStats() {
   }
   return out;
 }
+const MEAL_CAP = { pa: 45, al: 70, la: 45, ja: 70, ce: 50 }; // proteína máxima razoável por refeição (g)
 function closeSuggestions() {
   const t = totals();
   const rp = state.goal - t.p;
   if (rp < 3) return [];
   const rk = state.goalKcal ? state.goalKcal - t.k : null;
   const rc = state.goalCarbs ? state.goalCarbs - t.c : null;
-  const meal = mealFor(Date.now());
+  const now = new Date();
+  if (now.getHours() < 5) return [];                       // depois da meia-noite o dia acabou de começar
+  const meal = mealFor(now.getTime());
   const late = meal === 'ce';
   const stats = mealStats();
+  // Quanto faz sentido comer nesta refeição: o que falta, até a um máximo realista.
+  const target = Math.min(rp, MEAL_CAP[meal]);
+  const share = target / rp;
+  const kb = rk != null ? Math.max(rk, 0) * share : null;  // calorias disponíveis para esta refeição
+  const cb = rc != null ? Math.max(rc, 0) * share : null;
 
   // Um alimento serve para esta refeição? Primeiro pelo teu histórico, depois pelo tipo de alimento.
   const fit = (p) => {
@@ -546,21 +560,21 @@ function closeSuggestions() {
   }
   const score = (items) => {
     const P = items.reduce((s, i) => s + i.P, 0), K = items.reduce((s, i) => s + i.K, 0), C = items.reduce((s, i) => s + i.C, 0);
-    const short = Math.max(0, rp - P), over = Math.max(0, P - rp);
-    let sc = Math.max(0, short - 2) * 1.2 + Math.max(0, over - 6) * 0.4; // fechar a proteína (±2 g), sem exagerar
-    if (rk != null) sc += Math.max(0, K - Math.max(rk, 0)) / 6;    // não passar as calorias que restam
+    const short = Math.max(0, target - P), over = Math.max(0, P - target);
+    let sc = Math.max(0, short - 2) * 1.2 + Math.max(0, over - 6) * (target < rp ? 0.8 : 0.4); // chegar ao alvo (±2 g), sem exagerar
+    if (kb != null) sc += Math.max(0, K - kb) / 6;                 // não passar as calorias desta refeição
     sc += K / (rk != null ? 400 : 250);                             // preferir o mais magro
-    if (rc != null) sc += Math.max(0, C - Math.max(rc, 0)) * 0.8;  // nem os hidratos
+    if (cb != null) sc += Math.max(0, C - cb) * 0.8;               // nem os hidratos
     if (late) sc += Math.max(0, K - 350) / 40;                      // à noite, coisas leves
     sc -= items.reduce((s, i) => s + i.fav, 0) * 0.45 / items.length; // o que costumas comer
     sc -= items.reduce((s, i) => s + i.habit, 0) * 2 / items.length;   // ...e a esta hora
     sc += items.filter((i) => !i.fav).length * 3;                   // novidades só se compensarem
     sc += (items.length - 1) * 3;                                   // uma coisa é mais simples que duas
     items.forEach((i) => { if (i.g > 350 && !(i.p.unitG && i.g === i.p.unitG)) sc += (i.g - 350) / 15; }); // porções exageradas (1 embalagem não conta)
-    return { items, P, K, C, short, sc };
+    return { items, P, K, C, short: Math.max(0, rp - P), sc };
   };
   const plans = opts.map((o) => score([o]));
-  const smalls = opts.filter((o) => o.P < rp - 3);
+  const smalls = opts.filter((o) => o.P < target - 3);
   for (let i = 0; i < smalls.length; i++)
     for (let j = i + 1; j < smalls.length; j++)
       if (smalls[i].p.id !== smalls[j].p.id) plans.push(score([smalls[i], smalls[j]]));
@@ -568,12 +582,13 @@ function closeSuggestions() {
 
   const picked = [], used = new Set();
   for (const pl of plans) {
+    if (picked.length && pl.sc > picked[0].sc + 6) break;     // só mostra alternativas que sejam boas
     const ids = pl.items.map((i) => i.p.id);
     if (ids.some((id) => used.has(id))) continue; // variedade: cada alimento só numa sugestão
     picked.push(pl); ids.forEach((id) => used.add(id));
     if (picked.length === 3) break;
   }
-  return picked.map((pl) => ({ ...pl, rk, rc, meal }));
+  return picked.map((pl) => ({ ...pl, rk, rc, meal, target, rp }));
 }
 let closePlans = [];
 function renderCloser() {
@@ -582,13 +597,15 @@ function renderCloser() {
   closePlans = isToday() ? closeSuggestions() : [];
   wrap.hidden = !closePlans.length;
   if (!closePlans.length) return;
-  $('#close-head').textContent = `Para fechar os ${rp} g · ideias para ${{ pa: 'o pequeno-almoço', al: 'o almoço', la: 'o lanche', ja: 'o jantar', ce: 'a ceia' }[closePlans[0].meal]}`;
+  const mealTxt = { pa: 'o pequeno-almoço', al: 'o almoço', la: 'o lanche', ja: 'o jantar', ce: 'a ceia' }[closePlans[0].meal];
+  const partial = closePlans[0].target < rp - 2;
+  $('#close-head').textContent = partial ? `Faltam ${rp} g hoje · ideias para ${mealTxt} (~${Math.round(closePlans[0].target)} g)` : `Para fechar os ${rp} g · ideias para ${mealTxt}`;
   $('#close-list').innerHTML = closePlans.map((pl, i) => {
     const name = pl.items.map((it) => esc(it.p.name.replace(/ \((cozinhad[oa]|cozid[oa]|grelhad[oa])\)$/, ''))).join(' + ');
     const qty = pl.items.map((it) => qtyText(it.p, it.g)).join(' + ');
-    const status = pl.short <= 2 ? 'fecha a meta' : `faltam ainda ${Math.round(pl.short)} g`;
+    const status = pl.short <= 2 ? 'fecha a meta' : `depois faltam ${Math.round(pl.short)} g`;
     let kcal = `${Math.round(pl.K)} kcal`;
-    if (pl.rk != null) kcal += pl.K > pl.rk ? ` (passa ${Math.round(pl.K - Math.max(pl.rk, 0))})` : '';
+    if (pl.rk != null && pl.K > pl.rk) kcal += ` (passa ${Math.round(pl.K - Math.max(pl.rk, 0))})`;
     return `<li><div class="main"><div class="name">${name}</div><div class="sub">${qty} · ${kcal} · ${status}</div></div>
       <span class="gain">+${fmt(pl.P)} g</span>
       <button data-plan="${i}" aria-label="Registar ${name}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button></li>`;
